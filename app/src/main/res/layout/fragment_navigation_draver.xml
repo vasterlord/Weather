@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#8d6e63"
+    tools:context=".fragment.NavigationDraverFragment">
+
+    <ImageView
+        android:src="@drawable/background"
+        android:layout_width="280dp"
+        android:layout_height="160dp"
+        android:focusable="false"
+        android:layout_alignParentStart="true">'
+    </ImageView>
+
+    <requestFocus />
+
+    <requestFocus />
+
+    <ImageView
+        android:elevation="5dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/ivPhotoUser"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="30dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text=" Іван Рудик"
+        android:id="@+id/textView"
+        android:layout_below="@+id/ivPhotoUser"
+        android:layout_alignStart="@+id/ivPhotoUser"
+        android:layout_marginTop="5dp"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="ivanrudyk1996@gmail.com"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView"
+        android:layout_alignStart="@+id/textView"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp" />
+</RelativeLayout>

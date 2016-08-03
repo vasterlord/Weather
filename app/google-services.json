@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "409734398715",
+    "firebase_url": "https://justweather-92b19.firebaseio.com",
+    "project_id": "justweather-92b19",
+    "storage_bucket": "justweather-92b19.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409734398715:android:7caec4b6cb3689fa",
+        "android_client_info": {
+          "package_name": "com.example.yulian.weatherapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "409734398715-d7om0c4n4gg0p9age0fuc2nbai79dvtv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlHk3NP-GDZLHnWOCWfP1yZkFpS3TfGK0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409734398715:android:7f0eaa1e666411fe",
+        "android_client_info": {
+          "package_name": "ivanrudyk.com.open_weather_api"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "409734398715-d7om0c4n4gg0p9age0fuc2nbai79dvtv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlHk3NP-GDZLHnWOCWfP1yZkFpS3TfGK0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

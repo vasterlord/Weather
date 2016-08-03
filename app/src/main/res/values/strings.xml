@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Wether App</string>
+    <string name="title_activity_main"></string>
+    <string name="action_settings">Settings</string>
+    <string name="login">login</string>
+    <string name="title_activity_register">REGISTER</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="username_error">invalidate User Name</string>
+    <string name="password_error">password is empty</string>
+    <string name="login_error">login is empty</string>
+    <string name="city_error">city is empty</string>
+</resources>
