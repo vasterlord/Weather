@@ -9,7 +9,7 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
  */
 public interface RegisterIterator {
 
-    void login(Users user, OnRegisterFinishedListener onRegisterFinishedListener,  String confPass, String city, Bitmap photoLoad);
+    void register(Users user, OnRegisterFinishedListener onRegisterFinishedListener,  String confPass, String city, Bitmap photoLoad);
 
     interface OnRegisterFinishedListener {
 

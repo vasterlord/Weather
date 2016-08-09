@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
+import ivanrudyk.com.open_weather_api.activity.main.MainPresenter;
 import ivanrudyk.com.open_weather_api.helper.PhotoHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
 
@@ -25,20 +26,28 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
 /**
  * A simple {@link Fragment} subclass.
  */
+
 public class NavigationDraverFragment extends Fragment {
 
-    public static Users users = new Users();
+    public Users users = new Users();
+
+    TextView tvNavUserName, tvNavLogin;
+    ImageView ivPhotoUser;
+
 
     public static final String PREF_FILE_NAME = "preffilename";
     public static final String KEY_USER_LEARNED_DRAWER = "user_learned_drawer";
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-    private PhotoHelper photoHelper = new PhotoHelper();
+
 
     private boolean mUserLearndDrawer;
     private boolean mFromSavedInstanseState;
     private View containerView;
     Bitmap bmEnd;
+
+    MainPresenter presenter;
+    PhotoHelper photoHelper = new PhotoHelper();
 
     public NavigationDraverFragment() {
         // Required empty public constructor
@@ -47,22 +56,24 @@ public class NavigationDraverFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        if (bmEnd==null) {
+        if (bmEnd == null) {
             Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.qwe);
             bmEnd = photoHelper.getCircleMaskedBitmapUsingClip(users.getPhoto(), 60);
         }
+
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mUserLearndDrawer = Boolean.valueOf((readFromPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, "false")));
+
+
+        mUserLearndDrawer = Boolean.valueOf((readFromPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, "false")));
         if (savedInstanceState != null) {
             mFromSavedInstanseState = true;
         }
-        users.setUserName("");
+//        users.setUserName("");
 //        users.setPhoto(BitmapFactory.decodeResource(getResources(), R.drawable.qwe));
-
     }
 
     @Override
@@ -70,14 +81,20 @@ public class NavigationDraverFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_navigation_draver, container, false);
-        ImageView i = (ImageView) v.findViewById(R.id.ivPhotoUser);
-        TextView t = (TextView) v.findViewById(R.id.textView);
-        t.setText(users.getUserName());
-        i.setImageBitmap(bmEnd);
+        ivPhotoUser = (ImageView) v.findViewById(R.id.ivPhotoUser);
+        tvNavUserName = (TextView) v.findViewById(R.id.tvDrUserName);
+        tvNavLogin = (TextView) v.findViewById(R.id.tvDrLogin);
+        ivPhotoUser.setImageBitmap(photoHelper.getCircleMaskedBitmapUsingClip(BitmapFactory.decodeResource(getResources(), R.drawable.qwe), 60));
         return v;
     }
 
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar) {
+
+    public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar, Users users) {
+        this.users = users;
+
+        tvNavUserName.setText(this.users.getUserName());
+        tvNavLogin.setText(this.users.getLogin());
+        ivPhotoUser.setImageBitmap(PhotoHelper.getCircleMaskedBitmapUsingClip(this.users.getPhoto(), 60));
 
         containerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
@@ -133,4 +150,5 @@ public class NavigationDraverFragment extends Fragment {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString(preferenceName, defaultValue);
     }
+
 }

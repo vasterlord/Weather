@@ -8,14 +8,16 @@ import java.util.List;
  * Created by Ivan on 04.07.2016.
  */
 public class Users {
-    private String login;
     private String password;
+    private String login;
     private String userName;
     private Bitmap Photo;
+    private List<String> location;
 
 
     public Users() {
     }
+
     public Bitmap getPhoto() {
         return Photo;
     }
@@ -35,7 +37,7 @@ public class Users {
         this.userName = userName;
     }
 
-    private List<String> location;
+
 
 
 

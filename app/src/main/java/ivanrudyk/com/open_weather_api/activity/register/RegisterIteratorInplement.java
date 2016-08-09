@@ -11,7 +11,7 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
  */
 public class RegisterIteratorInplement implements RegisterIterator {
     @Override
-    public void login(final Users user, final OnRegisterFinishedListener listener,  final String confPass, final String city, final Bitmap photoLoad) {
+    public void register(final Users user, final OnRegisterFinishedListener listener,  final String confPass, final String city, final Bitmap photoLoad) {
         new Handler().postDelayed(new Runnable() {
             @Override public void run() {
                 boolean error = false;

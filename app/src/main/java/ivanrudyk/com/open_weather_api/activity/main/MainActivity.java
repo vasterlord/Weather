@@ -9,39 +9,49 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.activity.register.RegisterActivity;
 import ivanrudyk.com.open_weather_api.fragment.NavigationDraverFragment;
+import ivanrudyk.com.open_weather_api.model_user.Users;
 
 
 public class MainActivity extends AppCompatActivity implements MainView, View.OnClickListener {
 
     Toolbar toolbar;
-    ImageView imOk, imFasebookLogin;
-    TextView etRegister;
+    ImageView imOk, imFasebookLogin, iv;
+    TextView etRegister, tv;
+    EditText etLogin, etPassword;
+    ProgressBar progressBar;
 
+
+    MainPresenter presenter;
+    Users users = new Users();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        onCreareToolBar();
+        iv = (ImageView)findViewById(R.id.imageWeather);
+                presenter = new MainPresenterImplement(this);
+        tv = (TextView) findViewById(R.id.textView3);
+        onCreareToolBar(users);
     }
 
 
-    private void onCreareToolBar() {
+    private void onCreareToolBar(Users users) {
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         NavigationDraverFragment draverFragment = (NavigationDraverFragment)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_draver);
-        draverFragment.setUp(R.id.fragment_navigation_draver, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
+        draverFragment.setUp(R.id.fragment_navigation_draver, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar, users);
     }
 
     @Override
@@ -69,9 +79,12 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
         return super.onOptionsItemSelected(item);
     }
 
-    private void showDialogLogin(){
+    private void showDialogLogin() {
         final Dialog d = new Dialog(this);
         d.setContentView(R.layout.login_layout);
+        etLogin = (EditText) d.findViewById(R.id.etLogin);
+        etPassword = (EditText) d.findViewById(R.id.etPassword);
+        progressBar = (ProgressBar) d.findViewById(R.id.progressBarLogin);
         imOk = (ImageView) d.findViewById(R.id.iv_ok_login);
         etRegister = (TextView) d.findViewById(R.id.etRegister);
         etRegister.setSelectAllOnFocus(true);
@@ -82,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
                 startActivity(new Intent(MainActivity.this, RegisterActivity.class));
             }
         });
+        imOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString());
+            }
+        });
 
         d.show();
     }
@@ -89,5 +108,36 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     @Override
     public void onClick(View view) {
 
+    }
+
+    @Override
+    public void setLoginError(String value) {
+        etLogin.setError(value);
+    }
+
+    @Override
+    public void setPasswordError() {
+        etPassword.setError(getString(R.string.password_error));
+    }
+
+    @Override
+    public void showProgress() {
+       progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void toastShow(String value) {
+
+    }
+
+    @Override
+    public void setUser(Users activeUser) {
+        this.users = activeUser;
+        onCreareToolBar(activeUser);
+    }
+
+    @Override
+    public void hideProgress() {
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }

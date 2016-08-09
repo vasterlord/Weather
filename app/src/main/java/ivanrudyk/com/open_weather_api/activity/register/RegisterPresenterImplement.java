@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 
 import java.util.ArrayList;
 
-import ivanrudyk.com.open_weather_api.fragment.NavigationDraverFragment;
 import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
 
@@ -32,7 +31,7 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
         RegisterProgress registerProgress = new RegisterProgress();
         this.user = userAdd;
         registerProgress.execute();
-        registerInteractor.login(user, this, confPass, city,  photoLoad);
+        registerInteractor.register(user, this, confPass, city,  photoLoad);
     }
 
     @Override
@@ -59,7 +58,6 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
             if (photoLoad != null) {
                 helper.loadPhotoStorage(user.getUserName(), photoLoad);
             }
-            NavigationDraverFragment.users.setPhoto(photoLoad);
         }
 
     }

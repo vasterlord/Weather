@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text=" Іван Рудик"
-        android:id="@+id/textView"
+        android:id="@+id/tvDrUserName"
         android:layout_below="@+id/ivPhotoUser"
         android:layout_alignStart="@+id/ivPhotoUser"
         android:layout_marginTop="5dp"
@@ -41,9 +41,17 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="ivanrudyk1996@gmail.com"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/textView"
+        android:id="@+id/tvDrLogin"
+        android:layout_below="@+id/tvDrUserName"
+        android:layout_alignStart="@+id/tvDrUserName"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp" />
+
+    <ListView
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/listViewLocation"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="160dp" />
 </RelativeLayout>

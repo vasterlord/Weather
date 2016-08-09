@@ -29,7 +29,7 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
 public class RegisterActivity extends AppCompatActivity implements RegisterView, View.OnClickListener {
 
 
-    EditText etLogin, etPassword, etUserName, etCity, etConfirmPassword;
+    EditText etLoginRegister, etPasswordRegister, etUserName, etCity, etConfirmPassword;
     ImageView ivCamera, ivGalary, ivOkRegister, ivCancelRegister;
     ProgressBar progressBarRegister;
 
@@ -61,8 +61,8 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
     }
 
     private void initializeComponentView() {
-        etLogin = (EditText) findViewById(R.id.et_register_login);
-        etPassword = (EditText) findViewById(R.id.et_register_password);
+        etLoginRegister = (EditText) findViewById(R.id.et_register_login);
+        etPasswordRegister = (EditText) findViewById(R.id.et_register_password);
         etUserName = (EditText) findViewById(R.id.et_register_user_name);
         etCity = (EditText) findViewById(R.id.et_city_register);
         etConfirmPassword = (EditText) findViewById(R.id.et_confirm_password);
@@ -104,9 +104,9 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
             case R.id.iv_ok_register:
                 locationStart.clear();
                 locationStart.add(etCity.getText().toString());
-                userAdd.setLogin(etLogin.getText().toString());
+                userAdd.setLogin(etLoginRegister.getText().toString());
                 userAdd.setUserName(etUserName.getText().toString());
-                userAdd.setPassword(etPassword.getText().toString());
+                userAdd.setPassword(etPasswordRegister.getText().toString());
                 userAdd.setLocation(locationStart);
                 String city = etCity.getText().toString();
                 String confPass = etConfirmPassword.getText().toString();
@@ -180,12 +180,12 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
 
     @Override
     public void setPasswordError() {
-        etPassword.setError(getString(R.string.password_error));
+        etPasswordRegister.setError(getString(R.string.password_error));
     }
 
     @Override
     public void setLoginError() {
-        etLogin.setError(getString(R.string.login_error));
+        etLoginRegister.setError(getString(R.string.login_error));
     }
 
     @Override
