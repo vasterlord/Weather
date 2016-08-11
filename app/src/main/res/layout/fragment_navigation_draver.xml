@@ -1,21 +1,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="280dp"
     android:layout_height="match_parent"
     android:background="#8d6e63"
     tools:context=".fragment.NavigationDraverFragment">
+
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
     <ImageView
         android:src="@drawable/background"
         android:layout_width="280dp"
         android:layout_height="160dp"
         android:focusable="false"
-        android:layout_alignParentStart="true">'
+        android:layout_alignParentStart="true"
+        android:id="@+id/imageView">'
     </ImageView>
-
-    <requestFocus />
-
-    <requestFocus />
 
     <ImageView
         android:elevation="5dp"
@@ -47,11 +54,84 @@
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp" />
 
-    <ListView
-        android:layout_width="280dp"
+            <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listViewLocation"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="160dp" />
+        android:layout_marginTop="170dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/linLayoutAddLoc"
+            android:clickable="false"
+            >
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:id="@+id/ivAddLocation"
+                android:src="@drawable/ic_add_black_24dp"
+                android:layout_marginLeft="16dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/add_new_loc"
+                android:id="@+id/textView9"
+                android:layout_marginLeft="30dp"
+                android:layout_alignTop="@+id/ivAddLocation"
+                android:layout_toEndOf="@+id/ivAddLocation"
+                android:layout_alignBottom="@+id/ivAddLocation"
+                android:textSize="20dp"
+                android:layout_marginTop="10dp"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/linearLayoutSettings"
+            android:layout_marginTop="6dp">
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:id="@+id/imageView2"
+                android:src="@drawable/ic_settings_black_24dp"
+                android:layout_marginLeft="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_settings"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/textView10"
+                android:layout_marginLeft="35dp"
+                android:layout_marginTop="10dp"
+                android:textSize="20dp"
+                android:textColor="#000000" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:id="@+id/LinearLayoutLiostLocation">
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/listViewLocation"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentStart="true" />
+        </LinearLayout>
+    </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

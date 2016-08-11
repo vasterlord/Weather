@@ -33,7 +33,7 @@ public class FirebaseHelper {
 
     public static ArrayList<String> arrayListUserData = new ArrayList();
     public static ArrayList<Users> arrayListUser = new ArrayList();
-    ArrayList<String> arrayListLocation = new ArrayList();
+    public static ArrayList<String> arrayListLocation = new ArrayList();
 
     public static Bitmap photoDownload;
 
@@ -117,7 +117,6 @@ public class FirebaseHelper {
     }
 
     private void fetchDataLocatoin(DataSnapshot dataSnapshot) {
-
         for (DataSnapshot ds : dataSnapshot.getChildren()) {
             arrayListLocation.add(ds.getValue().toString());
         }
@@ -174,4 +173,5 @@ public class FirebaseHelper {
             }
         });
     }
+
 }

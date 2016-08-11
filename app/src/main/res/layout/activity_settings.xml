@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+
+    tools:context=".activity.register.RegisterActivity"
+    android:background="#dbdbdb">
+
+    <include
+        android:id="@+id/app_bar"
+        layout="@layout/app_bar"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:elevation="1dp">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:id="@+id/imageView4"
+                android:layout_marginTop="30dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="30dp"
+                android:src="@drawable/qwe" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="User Name"
+                android:id="@+id/tv_user_name"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="60dp"
+                android:textColor="#000000" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:background="#ffffff"
+            android:elevation="1dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Edit this user"
+                android:id="@+id/textView11"
+                android:textColor="#6164e5"
+                android:singleLine="false"
+                android:textStyle="bold"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:background="#ffffff"
+        android:elevation="5dp">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="      Quit"
+            android:id="@+id/button"
+            android:background="#ffffff"
+            android:textColor="#6164e5"
+            android:textAlignment="textStart"
+            android:textStyle="bold" />
+    </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

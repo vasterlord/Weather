@@ -3,6 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="300dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorDialog"
     android:weightSum="1">
 
@@ -11,38 +12,28 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_marginTop="40dp">
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/linearLayout2">
 
-
-        <TextView
-            android:id="@+id/tvLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Login"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_marginLeft="10dp" />
 
         <EditText
             android:id="@+id/etLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp" />
-
-        <TextView
-            android:id="@+id/tvPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Password"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:layout_marginLeft="10dp" />
+            android:layout_marginRight="10dp"
+            android:hint="Login"
+            android:textSize="20dp" />
 
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp" />
+            android:layout_marginRight="10dp"
+            android:hint="Password"
+            android:textSize="20dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -87,12 +78,15 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:visibility="invisible"
-            android:id="@+id/progressBarLogin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminateDrawable="@drawable/spinner_ring"
-            android:indeterminateOnly="true" />
     </LinearLayout>
+
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/progressBarLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateDrawable="@drawable/spinner_ring"
+        android:indeterminateOnly="true"
+        android:layout_above="@+id/linearLayout2"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

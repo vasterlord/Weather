@@ -1,7 +1,9 @@
 package ivanrudyk.com.open_weather_api.fragment;
 
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,10 +16,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
+import ivanrudyk.com.open_weather_api.activity.Settings.SettingsActivity;
 import ivanrudyk.com.open_weather_api.activity.main.MainPresenter;
 import ivanrudyk.com.open_weather_api.helper.PhotoHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
@@ -27,37 +36,51 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
  * A simple {@link Fragment} subclass.
  */
 
-public class NavigationDraverFragment extends Fragment {
-
-    public Users users = new Users();
-
-    TextView tvNavUserName, tvNavLogin;
-    ImageView ivPhotoUser;
-
+public class NavigationDraverFragment extends Fragment implements NavigationDraverView {
 
     public static final String PREF_FILE_NAME = "preffilename";
     public static final String KEY_USER_LEARNED_DRAWER = "user_learned_drawer";
+    public Users users = new Users();
+    TextView tvNavUserName, tvNavLogin;
+    ImageView ivPhotoUser;
+    ListView lvLocation;
+    ImageView bAdd;
+    Button bAddLocation;
+    EditText etAddLocation;
+    Bitmap bmEnd;
+    LinearLayout linearLayoutAddLoc, linearLayoutSettings;
+    MainPresenter presenter;
+    PhotoHelper photoHelper = new PhotoHelper();
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-
-
     private boolean mUserLearndDrawer;
     private boolean mFromSavedInstanseState;
     private View containerView;
-    Bitmap bmEnd;
 
-    MainPresenter presenter;
-    PhotoHelper photoHelper = new PhotoHelper();
+    private Dialog d;
+
+    NavigatonDraverPresenter draverPresenter;
 
     public NavigationDraverFragment() {
         // Required empty public constructor
+    }
+
+    public static void saveToPreferenses(Context context, String preferenceName, String preferenceValue) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(preferenceName, preferenceValue);
+        editor.apply();
+    }
+
+    public static String readFromPreferenses(Context context, String preferenceName, String defaultValue) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(preferenceName, defaultValue);
     }
 
     @Override
     public void onStart() {
         super.onStart();
         if (bmEnd == null) {
-            Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.qwe);
             bmEnd = photoHelper.getCircleMaskedBitmapUsingClip(users.getPhoto(), 60);
         }
 
@@ -66,8 +89,6 @@ public class NavigationDraverFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         mUserLearndDrawer = Boolean.valueOf((readFromPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, "false")));
         if (savedInstanceState != null) {
             mFromSavedInstanseState = true;
@@ -84,10 +105,52 @@ public class NavigationDraverFragment extends Fragment {
         ivPhotoUser = (ImageView) v.findViewById(R.id.ivPhotoUser);
         tvNavUserName = (TextView) v.findViewById(R.id.tvDrUserName);
         tvNavLogin = (TextView) v.findViewById(R.id.tvDrLogin);
+        lvLocation = (ListView) v.findViewById(R.id.listViewLocation);
+        bAdd = (ImageView) v.findViewById(R.id.ivAddLocation);
+        linearLayoutAddLoc = (LinearLayout) v.findViewById(R.id.linLayoutAddLoc);
+        linearLayoutSettings = (LinearLayout) v.findViewById(R.id.linearLayoutSettings);
         ivPhotoUser.setImageBitmap(photoHelper.getCircleMaskedBitmapUsingClip(BitmapFactory.decodeResource(getResources(), R.drawable.qwe), 60));
+        draverPresenter = new NavigationDraverPresenterImplement(this);
+
+        linearLayoutAddLoc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (users.getUserName() != null) {
+                    d = new Dialog(getActivity());
+                    d.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    d.setContentView(R.layout.add_location_layout);
+                    etAddLocation = (EditText) d.findViewById(R.id.etAddLocation);
+                    bAddLocation = (Button) d.findViewById(R.id.bAddLocation);
+
+                    bAddLocation.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            draverPresenter.addLocation(users, etAddLocation.getText().toString());
+                        }
+                    });
+                    d.show();
+                }
+            }
+        });
+
+
+        linearLayoutSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+            }
+        });
+
+
         return v;
     }
 
+    public void arrayAdapter() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, users.getLocation());
+        if (users.getLocation() != null) {
+            lvLocation.setAdapter(adapter);
+        }
+    }
 
     public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar, Users users) {
         this.users = users;
@@ -95,6 +158,9 @@ public class NavigationDraverFragment extends Fragment {
         tvNavUserName.setText(this.users.getUserName());
         tvNavLogin.setText(this.users.getLogin());
         ivPhotoUser.setImageBitmap(PhotoHelper.getCircleMaskedBitmapUsingClip(this.users.getPhoto(), 60));
+
+        arrayAdapter();
+
 
         containerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
@@ -139,16 +205,22 @@ public class NavigationDraverFragment extends Fragment {
         });
     }
 
-    public static void saveToPreferenses(Context context, String preferenceName, String preferenceValue) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(preferenceName, preferenceValue);
-        editor.apply();
+    @Override
+    public void setUpFragment() {
+        arrayAdapter();
     }
 
-    public static String readFromPreferenses(Context context, String preferenceName, String defaultValue) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(preferenceName, defaultValue);
+    @Override
+    public void setLocationAddError(String s) {
+        etAddLocation.setError(s);
     }
 
+    @Override
+    public void setDialogClosed() {
+        dialogClosed();
+    }
+
+    private void dialogClosed() {
+        d.cancel();
+    }
 }

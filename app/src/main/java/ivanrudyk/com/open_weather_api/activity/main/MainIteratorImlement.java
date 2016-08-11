@@ -23,7 +23,6 @@ public class MainIteratorImlement implements MainIterator {
                 if (!error){
                     listener.onSuccess(userLogin, userPassword);
                 }
-
             }
         }, 2000);
     }

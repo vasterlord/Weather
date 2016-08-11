@@ -1,7 +1,9 @@
 package ivanrudyk.com.open_weather_api.activity.main;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -9,10 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.activity.register.RegisterActivity;
@@ -27,20 +32,30 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     TextView etRegister, tv;
     EditText etLogin, etPassword;
     ProgressBar progressBar;
+    ImageButton ibLogin;
 
 
     MainPresenter presenter;
     Users users = new Users();
 
+    private Dialog d;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setVisibleLoginItem();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        iv = (ImageView)findViewById(R.id.imageWeather);
-                presenter = new MainPresenterImplement(this);
+        iv = (ImageView) findViewById(R.id.imageWeather);
+        presenter = new MainPresenterImplement(this);
         tv = (TextView) findViewById(R.id.textView3);
+        ibLogin = (ImageButton) findViewById(R.id.ibLogin);
         onCreareToolBar(users);
+        ibLogin.setOnClickListener(this);
     }
 
 
@@ -48,7 +63,10 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        onCreateNavigationDraver();
+    }
 
+    private void onCreateNavigationDraver() {
         NavigationDraverFragment draverFragment = (NavigationDraverFragment)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_draver);
         draverFragment.setUp(R.id.fragment_navigation_draver, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar, users);
@@ -58,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
@@ -72,15 +91,12 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
         if (id == R.id.action_settings) {
             return true;
         }
-        if (id == R.id.navigate_login) {
-            showDialogLogin();
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
     private void showDialogLogin() {
-        final Dialog d = new Dialog(this);
+        d = new Dialog(this);
+        d.requestWindowFeature(Window.FEATURE_NO_TITLE);
         d.setContentView(R.layout.login_layout);
         etLogin = (EditText) d.findViewById(R.id.etLogin);
         etPassword = (EditText) d.findViewById(R.id.etPassword);
@@ -98,16 +114,45 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
         imOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString());
+                if (!isOnline()) {
+                    d.cancel();
+                    Toast.makeText(getApplicationContext(),
+                            "No internet access", Toast.LENGTH_LONG).show();
+
+                    return;
+                } else {
+                    presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString());
+                }
             }
         });
 
         d.show();
     }
 
+    private boolean isOnline() {
+        String cs = Context.CONNECTIVITY_SERVICE;
+        ConnectivityManager cm = (ConnectivityManager)
+                getSystemService(cs);
+        if (cm.getActiveNetworkInfo() == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.ibLogin:
+                showDialogLogin();
+                break;
+            default:
+                break;
+        }
+    }
 
+    public void dialogClosed() {
+        d.cancel();
     }
 
     @Override
@@ -122,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
 
     @Override
     public void showProgress() {
-       progressBar.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -134,6 +179,24 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     public void setUser(Users activeUser) {
         this.users = activeUser;
         onCreareToolBar(activeUser);
+    }
+
+    @Override
+    public void setViseibleLogin() {
+        setVisibleLoginItem();
+    }
+
+    @Override
+    public void setDialogClosed() {
+        dialogClosed();
+    }
+
+    private void setVisibleLoginItem() {
+        if (users.getUserName() == null) {
+            ibLogin.setVisibility(View.VISIBLE);
+        } else {
+            ibLogin.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

@@ -17,4 +17,8 @@ public interface MainView {
     void toastShow(String userName);
 
     void setUser(Users activeUser);
+
+    void setViseibleLogin();
+
+    void setDialogClosed();
 }

@@ -28,9 +28,8 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
 
     @Override
     public void addUser(Users userAdd, String confPass, String city, Bitmap photoLoad) {
-        RegisterProgress registerProgress = new RegisterProgress();
+        registerView.showProgress();
         this.user = userAdd;
-        registerProgress.execute();
         registerInteractor.register(user, this, confPass, city,  photoLoad);
     }
 
@@ -58,6 +57,8 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
             if (photoLoad != null) {
                 helper.loadPhotoStorage(user.getUserName(), photoLoad);
             }
+            RegisterProgress registerProgress = new RegisterProgress();
+            registerProgress.execute();
         }
 
     }
@@ -113,7 +114,6 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            registerView.navigateToMain();
             registerView.hideProgress();
         }
     }

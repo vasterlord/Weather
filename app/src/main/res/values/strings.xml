@@ -13,4 +13,7 @@
     <string name="password_error">password is empty</string>
     <string name="login_error">login is empty</string>
     <string name="city_error">city is empty</string>
+    <string name="text_settings">Settings</string>
+    <string name="add_new_loc">Add new location</string>
+    <string name="title_activity_activity_settings">ActivitySettings</string>
 </resources>

@@ -1,6 +1,5 @@
 package ivanrudyk.com.open_weather_api.activity.main;
 
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import ivanrudyk.com.open_weather_api.model_user.Users;
 public class MainPresenterImplement implements MainPresenter, MainIterator.OnMainFinishedListener {
     private MainView mainView;
     private MainIterator iterator;
+
 
 
     Users activeUser = new Users();
@@ -59,10 +59,7 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         progress.execute(userLogin, userPassword);
     }
 
-
     class RetriveProgress extends AsyncTask<String, Void, Void> {
-
-       private Bitmap photoLoad;
 
         public void retrivActiveUser(String login, String password) {
             for (int userNumber = 0; userNumber < retrivUserArray.size(); userNumber++) {
@@ -77,6 +74,7 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         @Override
         protected void onPreExecute() {
             firebaseHelper.retrivDataUser();
+            FirebaseHelper.arrayListLocation.clear();
         }
 
         @Override
@@ -89,16 +87,22 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
             firebaseHelper.sortDataUser();
             retrivUserArray = FirebaseHelper.arrayListUser;
             retrivActiveUser(strings[0], strings[1]);
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (activeUser.getUserName()!=null){
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                firebaseHelper.downloadPhotoStorage(activeUser.getUserName());
+                firebaseHelper.retriveDataLocation(activeUser.getUserName());
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            firebaseHelper.downloadPhotoStorage(activeUser.getUserName());
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            else{
+                mainView.toastShow("Incorect login or password");
             }
             return null;
         }
@@ -110,8 +114,11 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         @Override
         protected void onPostExecute(Void aVoid) {
             activeUser.setPhoto(FirebaseHelper.photoDownload);
+            activeUser.setLocation(FirebaseHelper.arrayListLocation);
             mainView.hideProgress();
             mainView.setUser(activeUser);
+            mainView.setViseibleLogin();
+            mainView.setDialogClosed();
         }
     }
 
