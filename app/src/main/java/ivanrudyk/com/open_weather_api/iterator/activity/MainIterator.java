@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.activity.main;
+package ivanrudyk.com.open_weather_api.iterator.activity;
 
 /**
  * Created by Ivan on 03.08.2016.

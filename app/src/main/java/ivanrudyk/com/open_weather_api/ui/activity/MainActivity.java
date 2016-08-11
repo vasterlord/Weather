@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.activity.main;
+package ivanrudyk.com.open_weather_api.ui.activity;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -19,13 +19,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.activity.register.RegisterActivity;
-import ivanrudyk.com.open_weather_api.fragment.NavigationDraverFragment;
+import ivanrudyk.com.open_weather_api.helper.ArrayHelper;
+import ivanrudyk.com.open_weather_api.helper.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenter;
+import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenterImplement;
+import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverFragment;
 
+class MainActivity extends AppCompatActivity implements MainView, View.OnClickListener {
 
-public class MainActivity extends AppCompatActivity implements MainView, View.OnClickListener {
+    private static final String KEY = "keyprf";
 
     Toolbar toolbar;
     ImageView imOk, imFasebookLogin, iv;
@@ -34,9 +42,10 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     ProgressBar progressBar;
     ImageButton ibLogin;
 
-
     MainPresenter presenter;
     Users users = new Users();
+
+    RealmDbHelper dbHelper = new RealmDbHelper();
 
     private Dialog d;
 
@@ -47,19 +56,36 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        ArrayHelper arrayHelper = new ArrayHelper(this);
+        arrayHelper.saveArray(KEY, (ArrayList<String>) users.getLocation());
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
+                .name(Realm.DEFAULT_REALM_NAME)
+                .schemaVersion(0)
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.setDefaultConfiguration(realmConfiguration);
         setContentView(R.layout.activity_main);
+
+        users = dbHelper.retriveUserFromRealm(this);
+
         iv = (ImageView) findViewById(R.id.imageWeather);
         presenter = new MainPresenterImplement(this);
         tv = (TextView) findViewById(R.id.textView3);
         ibLogin = (ImageButton) findViewById(R.id.ibLogin);
-        onCreareToolBar(users);
+        onCreareToolBar();
         ibLogin.setOnClickListener(this);
     }
 
 
-    private void onCreareToolBar(Users users) {
+    private void onCreareToolBar() {
         toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -121,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
 
                     return;
                 } else {
-                    presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString());
+                    presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString(), MainActivity.this);
                 }
             }
         });
@@ -178,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements MainView, View.On
     @Override
     public void setUser(Users activeUser) {
         this.users = activeUser;
-        onCreareToolBar(activeUser);
+        onCreareToolBar();
     }
 
     @Override

@@ -1,7 +1,9 @@
-package ivanrudyk.com.open_weather_api.activity.main;
+package ivanrudyk.com.open_weather_api.iterator.activity;
 
 import android.os.Handler;
 import android.text.TextUtils;
+
+import ivanrudyk.com.open_weather_api.iterator.activity.MainIterator;
 
 /**
  * Created by Ivan on 03.08.2016.

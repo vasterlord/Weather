@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.ui.fragment;
 
 
 import android.app.Dialog;
@@ -23,13 +23,17 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.activity.Settings.SettingsActivity;
-import ivanrudyk.com.open_weather_api.activity.main.MainPresenter;
 import ivanrudyk.com.open_weather_api.helper.PhotoHelper;
+import ivanrudyk.com.open_weather_api.helper.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenter;
+import ivanrudyk.com.open_weather_api.presenter.fragment.NavigationDraverPresenterImplement;
+import ivanrudyk.com.open_weather_api.presenter.fragment.NavigatonDraverPresenter;
+import ivanrudyk.com.open_weather_api.ui.activity.SettingsActivity;
 
 
 /**
@@ -48,6 +52,7 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     Button bAddLocation;
     EditText etAddLocation;
     Bitmap bmEnd;
+    private ProgressBar progressBar;
     LinearLayout linearLayoutAddLoc, linearLayoutSettings;
     MainPresenter presenter;
     PhotoHelper photoHelper = new PhotoHelper();
@@ -60,9 +65,18 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     private Dialog d;
 
     NavigatonDraverPresenter draverPresenter;
+    private RealmDbHelper dbHelper = new RealmDbHelper();
+
+
 
     public NavigationDraverFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
     }
 
     public static void saveToPreferenses(Context context, String preferenceName, String preferenceValue) {
@@ -93,6 +107,8 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
         if (savedInstanceState != null) {
             mFromSavedInstanseState = true;
         }
+
+      //  users = dbHelper.retriveUserFromRealm(getContext());
 //        users.setUserName("");
 //        users.setPhoto(BitmapFactory.decodeResource(getResources(), R.drawable.qwe));
     }
@@ -121,6 +137,7 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                     d.setContentView(R.layout.add_location_layout);
                     etAddLocation = (EditText) d.findViewById(R.id.etAddLocation);
                     bAddLocation = (Button) d.findViewById(R.id.bAddLocation);
+                    progressBar = (ProgressBar) d.findViewById(R.id.progressBarAddLocation);
 
                     bAddLocation.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -218,6 +235,16 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     @Override
     public void setDialogClosed() {
         dialogClosed();
+    }
+
+    @Override
+    public void showProgress() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideProgress() {
+        progressBar.setVisibility(View.INVISIBLE);
     }
 
     private void dialogClosed() {

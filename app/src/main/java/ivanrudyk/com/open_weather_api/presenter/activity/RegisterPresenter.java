@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.activity.register;
+package ivanrudyk.com.open_weather_api.presenter.activity;
 
 import android.graphics.Bitmap;
 

@@ -7,7 +7,7 @@
     android:background="@color/colorAccent"
 
 
-    tools:context=".activity.register.RegisterActivity">
+    tools:context=".ui.activity.RegisterActivity">
 
    <include
        android:id="@+id/app_bar"

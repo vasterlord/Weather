@@ -1,7 +1,9 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.iterator.fragment;
 
 import android.os.Handler;
 import android.text.TextUtils;
+
+import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIterator;
 
 /**
  * Created by Ivan on 10.08.2016.

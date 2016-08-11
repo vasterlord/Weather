@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.iterator.fragment;
 
 /**
  * Created by Ivan on 10.08.2016.

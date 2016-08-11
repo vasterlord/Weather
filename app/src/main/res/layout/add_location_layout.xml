@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/Theme.AppCompat.NoActionBar"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/colorDialog"
     android:orientation="vertical">
 
@@ -13,10 +13,11 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="20dp"
         android:textSize="30dp"
-        android:hint="Init city location" />
+        android:hint="Init city location"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
 
     <Button
         android:id="@+id/bAddLocation"
@@ -24,5 +25,18 @@
         android:layout_height="62dp"
         android:layout_gravity="center_horizontal"
         android:text="ADD"
+        android:layout_below="@+id/etAddLocation"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp" />
-</LinearLayout>
+
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/progressBarAddLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateDrawable="@drawable/spinner_ring"
+        android:indeterminateOnly="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:indeterminate="false" />
+</RelativeLayout>

@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.activity.register;
+package ivanrudyk.com.open_weather_api.ui.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.R;
+import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenter;
+import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenterImplement;
 import ivanrudyk.com.open_weather_api.model_user.Users;
 
 public class RegisterActivity extends AppCompatActivity implements RegisterView, View.OnClickListener {

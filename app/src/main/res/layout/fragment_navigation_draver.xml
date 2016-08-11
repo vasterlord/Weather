@@ -3,7 +3,7 @@
     android:layout_width="280dp"
     android:layout_height="match_parent"
     android:background="#8d6e63"
-    tools:context=".fragment.NavigationDraverFragment">
+    tools:context=".ui.fragment.NavigationDraverFragment">
 
 
     <ScrollView

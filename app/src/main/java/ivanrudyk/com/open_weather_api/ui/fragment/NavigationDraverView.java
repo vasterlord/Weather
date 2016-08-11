@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.ui.fragment;
 
 /**
  * Created by Ivan on 10.08.2016.
@@ -9,4 +9,8 @@ public interface NavigationDraverView {
     void setLocationAddError(String s);
 
     void setDialogClosed();
+
+    void showProgress();
+
+    void hideProgress();
 }

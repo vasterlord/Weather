@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
 
 
-    tools:context=".activity.register.RegisterActivity"
+    tools:context=".ui.activity.RegisterActivity"
     android:background="#dbdbdb">
 
     <include
@@ -85,7 +85,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="      Quit"
-            android:id="@+id/button"
+            android:id="@+id/bQuit"
             android:background="#ffffff"
             android:textColor="#6164e5"
             android:textAlignment="textStart"

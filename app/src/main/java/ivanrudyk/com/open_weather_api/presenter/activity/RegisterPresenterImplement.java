@@ -1,12 +1,15 @@
-package ivanrudyk.com.open_weather_api.activity.register;
+package ivanrudyk.com.open_weather_api.presenter.activity;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
 
+import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIterator;
+import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIteratorInplement;
 import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.ui.activity.RegisterView;
 
 /**
  * Created by Ivan on 03.08.2016.

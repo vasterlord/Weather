@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.presenter.fragment;
 
 import android.os.AsyncTask;
 
@@ -7,8 +7,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
+import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIterator;
+import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIteratorImlement;
 import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverView;
 
 /**
  * Created by Ivan on 10.08.2016.
@@ -29,6 +32,7 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
 
     @Override
     public void addLocation(Users users, String newLocation) {
+        draverView.showProgress();
         draverIterator.addLocation(newLocation, this);
         this.user = users;
     }
@@ -37,6 +41,7 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
     @Override
     public void onLocatoinAddError() {
         draverView.setLocationAddError("location will not be empty");
+        draverView.hideProgress();
     }
 
     @Override
@@ -87,6 +92,7 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            draverView.hideProgress();
             user.setLocation(FirebaseHelper.arrayListLocation);
             draverView.setUpFragment();
             draverView.setDialogClosed();

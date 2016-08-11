@@ -1,9 +1,10 @@
-package ivanrudyk.com.open_weather_api.activity.register;
+package ivanrudyk.com.open_weather_api.iterator.activity;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIterator;
 import ivanrudyk.com.open_weather_api.model_user.Users;
 
 /**

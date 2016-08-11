@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.fragment;
+package ivanrudyk.com.open_weather_api.presenter.fragment;
 
 import ivanrudyk.com.open_weather_api.model_user.Users;
 

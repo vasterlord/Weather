@@ -11,7 +11,7 @@
         android:background="@color/colorAccent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activity.main.MainActivity">
+        tools:context=".ui.activity.MainActivity">
 
 
         <include
@@ -108,7 +108,7 @@
 
     <fragment
         android:id="@+id/fragment_navigation_draver"
-        android:name="ivanrudyk.com.open_weather_api.fragment.NavigationDraverFragment"
+        android:name="ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverFragment"
         android:layout_width="@dimen/nav_draver_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
