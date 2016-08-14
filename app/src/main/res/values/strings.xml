@@ -7,7 +7,7 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
 
-
+    <string name="app_id">1730537963881957</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="username_error">User Name is empty</string>
     <string name="password_error">password is empty</string>

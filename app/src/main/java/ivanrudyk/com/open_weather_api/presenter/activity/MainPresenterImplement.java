@@ -3,6 +3,8 @@ package ivanrudyk.com.open_weather_api.presenter.activity;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.facebook.Profile;
+
 import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
@@ -28,7 +30,6 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     FirebaseHelper firebaseHelper = new FirebaseHelper();
 
     ArrayList<Users> retrivUserArray = new ArrayList<>();
-    ArrayList<String> retrivData = new ArrayList<>();
 
     public MainPresenterImplement(MainView mainView) {
         this.mainView = mainView;
@@ -42,6 +43,12 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         mainView.showProgress();
         iterator.login(userLogin, userPassword, this);
     }
+
+    @Override
+    public void loginFacebook(Profile profile, Context context) {
+           iterator.loginFasebook(profile, this, context);
+    }
+
 
     @Override
     public void onLoginError() {
@@ -63,6 +70,11 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     public void onSuccess(String userLogin, String userPassword) {
         RetriveProgress progress = new RetriveProgress();
         progress.execute(userLogin, userPassword);
+    }
+
+    @Override
+    public void setUserFasebook(Users users) {
+        mainView.setUser(users);
     }
 
     public void retrivActiveUser(String login, String password) {

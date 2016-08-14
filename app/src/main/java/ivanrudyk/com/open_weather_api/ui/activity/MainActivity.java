@@ -3,8 +3,12 @@ package ivanrudyk.com.open_weather_api.ui.activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -19,6 +24,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import io.realm.Realm;
@@ -36,23 +51,52 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     private static final String KEY = "keyprf";
 
     Toolbar toolbar;
-    ImageView imOk, imFasebookLogin, iv;
+    ImageView imOk, iv;
     TextView etRegister, tv;
     EditText etLogin, etPassword;
     ProgressBar progressBar;
+    LoginButton loginButtonFacebook;
     ImageButton ibLogin;
 
     MainPresenter presenter;
     Users users = new Users();
 
     RealmDbHelper dbHelper = new RealmDbHelper();
+    Profile   profile;
 
     private Dialog d;
+    private CallbackManager mCallbackManager;
+    private FacebookCallback<LoginResult> mCallback = new FacebookCallback<LoginResult>() {
+        @Override
+        public void onSuccess(LoginResult loginResult) {
+            AccessToken accessToken = loginResult.getAccessToken();
+            profile = Profile.getCurrentProfile();
+            LoginFacebookTasck loginFacebookTasck = new LoginFacebookTasck();
+            loginFacebookTasck.execute();
+
+        }
+
+        @Override
+        public void onCancel() {
+
+        }
+
+        @Override
+        public void onError(FacebookException error) {
+
+        }
+    };
 
     @Override
     protected void onStart() {
         super.onStart();
         setVisibleLoginItem();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -65,6 +109,9 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        setContentView(R.layout.activity_main);
+
 
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .name(Realm.DEFAULT_REALM_NAME)
@@ -72,16 +119,34 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(realmConfiguration);
-        setContentView(R.layout.activity_main);
+
 
         users = dbHelper.retriveUserFromRealm(this);
 
         iv = (ImageView) findViewById(R.id.imageWeather);
         presenter = new MainPresenterImplement(this);
-        tv = (TextView) findViewById(R.id.textView3);
+
         ibLogin = (ImageButton) findViewById(R.id.ibLogin);
         onCreareToolBar();
         ibLogin.setOnClickListener(this);
+        tv = (TextView) findViewById(R.id.textView3);
+        mCallbackManager = new CallbackManager.Factory().create();
+
+
+        profile = Profile.getCurrentProfile();
+
+        Button b = (Button) findViewById(R.id.button);
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    iv.setImageURI(profile.getProfilePictureUri(256, 256));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
 
@@ -121,11 +186,17 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     }
 
     private void showDialogLogin() {
+
         d = new Dialog(this);
         d.requestWindowFeature(Window.FEATURE_NO_TITLE);
         d.setContentView(R.layout.login_layout);
         etLogin = (EditText) d.findViewById(R.id.etLogin);
         etPassword = (EditText) d.findViewById(R.id.etPassword);
+
+        loginButtonFacebook = (LoginButton) d.findViewById(R.id.login_button);
+
+        loginButtonFacebook.setReadPermissions("user_friends");
+        loginButtonFacebook.registerCallback(mCallbackManager, mCallback);
         progressBar = (ProgressBar) d.findViewById(R.id.progressBarLogin);
         imOk = (ImageView) d.findViewById(R.id.iv_ok_login);
         etRegister = (TextView) d.findViewById(R.id.etRegister);
@@ -217,6 +288,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         dialogClosed();
     }
 
+
     private void setVisibleLoginItem() {
         if (users.getUserName() == null) {
             ibLogin.setVisibility(View.VISIBLE);
@@ -229,4 +301,52 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     public void hideProgress() {
         progressBar.setVisibility(View.INVISIBLE);
     }
+
+   private class LoginFacebookTasck extends AsyncTask<Void, Void, Void>{
+       Bitmap bitmap;
+       Uri uri;
+       @Override
+       protected void onPreExecute() {
+           super.onPreExecute();
+
+       }
+
+       @Override
+        protected Void doInBackground(Void... voids) {
+           uri = (profile.getProfilePictureUri(256, 256));
+            try {
+               Thread.sleep(500);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+
+           try {
+               bitmap = MediaStore.Images.Media.getBitmap(getBaseContext().getContentResolver(), uri);
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           try {
+               Thread.sleep(500);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+           // presenter.loginFacebook(profile, getApplicationContext());
+
+
+
+        }
+    }
+
+
+
+
+
 }
