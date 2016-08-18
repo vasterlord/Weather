@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.helper;
+package ivanrudyk.com.open_weather_api.helpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;

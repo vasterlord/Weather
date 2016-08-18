@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIterator;
 import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIteratorImlement;
-import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
+import ivanrudyk.com.open_weather_api.model.Users;
 import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverView;
 
 /**
@@ -48,6 +48,11 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
     public void onSuccess(String newLocation) {
         listLocation.clear();
         listLocation.addAll(user.getLocation());
+        if (listLocation.size()>0) {
+            if (listLocation.get(0).equals("")) {
+                listLocation.remove(0);
+            }
+        }
         listLocation.add(newLocation);
         ImplementAddLocation implementAddLocation = new ImplementAddLocation();
         implementAddLocation.execute();
@@ -96,6 +101,7 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
             user.setLocation(FirebaseHelper.arrayListLocation);
             draverView.setUpFragment();
             draverView.setDialogClosed();
+            draverView.setUser(user);
         }
     }
 }

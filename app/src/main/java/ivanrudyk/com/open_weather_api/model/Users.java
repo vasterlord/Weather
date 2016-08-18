@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.model_user;
+package ivanrudyk.com.open_weather_api.model;
 
 import android.graphics.Bitmap;
 

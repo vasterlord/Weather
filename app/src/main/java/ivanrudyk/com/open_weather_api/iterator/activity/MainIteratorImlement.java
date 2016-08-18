@@ -1,18 +1,20 @@
 package ivanrudyk.com.open_weather_api.iterator.activity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import com.facebook.Profile;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 /**
  * Created by Ivan on 03.08.2016.
@@ -22,6 +24,7 @@ public class MainIteratorImlement implements MainIterator {
     private FirebaseHelper firebaseHelper = new FirebaseHelper();
     private ArrayList<Users> retrivUserArray = new ArrayList<>();
     private OnMainFinishedListener onMainFinishedListener;
+    Bitmap b;
 
 
     @Override
@@ -48,15 +51,30 @@ public class MainIteratorImlement implements MainIterator {
     @Override
     public void loginFasebook(Profile profile, OnMainFinishedListener onMainFinishedListener, Context context) {
         this.onMainFinishedListener = onMainFinishedListener;
+        Picasso.with(context)
+                .load(profile.getProfilePictureUri(256, 256))
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                       users.setPhoto(bitmap);
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                    }
+                });
         users.setUserName(profile.getName());
-        try {
-            users.setPhoto(MediaStore.Images.Media.getBitmap(context.getContentResolver(), profile.getProfilePictureUri(60, 60)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-       LoginFacebookTasck loginFacebookTasck = new LoginFacebookTasck();
-       loginFacebookTasck.execute();
+
+        LoginFacebookTasck loginFacebookTasck = new LoginFacebookTasck();
+        loginFacebookTasck.execute();
     }
+
 
     private boolean retrivActiveUser(String userName) {
         Boolean ret = false;
@@ -72,11 +90,6 @@ public class MainIteratorImlement implements MainIterator {
     private void retriveUserFirebase() {
         firebaseHelper.downloadPhotoStorage(users.getUserName());
         firebaseHelper.retriveDataLocation(users.getUserName());
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private void addUserFirebase() {
@@ -88,7 +101,7 @@ public class MainIteratorImlement implements MainIterator {
         u.setLocation(arLoc);
         u.setPassword("");
         firebaseHelper.addUser(u);
-        if(users.getPhoto()!=null){
+        if (users.getPhoto() != null) {
             firebaseHelper.loadPhotoStorage(users.getUserName(), users.getPhoto());
         }
     }
@@ -105,20 +118,19 @@ public class MainIteratorImlement implements MainIterator {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Thread.sleep(1500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             firebaseHelper.sortDataUser();
             retrivUserArray = FirebaseHelper.arrayListUser;
-            if (retrivActiveUser(users.getUserName())){
+            if (retrivActiveUser(users.getUserName())) {
                 retriveUserFirebase();
-            }
-            else{
+            } else {
                 addUserFirebase();
             }
             try {
-                Thread.sleep(1500);
+                Thread.sleep(250);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -133,8 +145,6 @@ public class MainIteratorImlement implements MainIterator {
             onMainFinishedListener.setUserFasebook(users);
         }
     }
-
-
 
 
 }

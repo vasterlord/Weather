@@ -1,6 +1,6 @@
 package ivanrudyk.com.open_weather_api.ui.activity;
 
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 
 public interface MainView {
@@ -19,6 +19,5 @@ public interface MainView {
     void setViseibleLogin();
 
     void setDialogClosed();
-
 
 }

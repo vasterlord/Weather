@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.facebook.Profile;
 
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 /**
  * Created by Ivan on 03.08.2016.
@@ -15,6 +15,7 @@ public interface MainIterator {
 
     void loginFasebook(Profile profile, OnMainFinishedListener onMainFinishedListener, Context context);
 
+
     interface OnMainFinishedListener {
 
         void onLoginError();
@@ -24,6 +25,7 @@ public interface MainIterator {
         void onSuccess(String userLogin, String userPassword);
 
         void setUserFasebook(Users users);
+
     }
 
 }

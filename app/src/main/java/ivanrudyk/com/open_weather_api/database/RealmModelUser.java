@@ -1,5 +1,6 @@
 package ivanrudyk.com.open_weather_api.database;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -11,6 +12,15 @@ public class RealmModelUser extends RealmObject {
     private String userName;
     private String login;
     private byte[] byteArray;
+    private RealmList<RealmLocation> realmLocationList = new RealmList<>();
+
+    public RealmList<RealmLocation> getRealmLocationList() {
+        return realmLocationList;
+    }
+
+    public void setRealmLocationList(RealmList<RealmLocation> realmLocationList) {
+        this.realmLocationList = realmLocationList;
+    }
 
     public byte[] getByteArray() {
         return byteArray;

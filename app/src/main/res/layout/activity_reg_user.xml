@@ -26,74 +26,43 @@
        android:layout_marginTop="70dp"
        android:weightSum="1">
 
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="Login"
-          android:id="@+id/tvLoginRegister"
-          android:layout_marginLeft="20dp" />
-
       <EditText
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:id="@+id/et_register_login"
           android:layout_marginLeft="20dp"
-          android:layout_marginRight="20dp" />
+          android:layout_marginRight="20dp"
+          android:hint="Login"
+          android:textSize="20dp" />
 
-
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="UserName"
-          android:id="@+id/textView3"
-          android:layout_marginLeft="20dp" />
 
       <EditText
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:id="@+id/et_register_user_name"
           android:layout_marginLeft="20dp"
-          android:layout_marginRight="20dp" />
-
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="City"
-          android:id="@+id/tvCity"
-          android:layout_marginLeft="20dp" />
+          android:layout_marginRight="20dp"
+          android:hint="User name"
+          android:textSize="20dp" />
 
       <EditText
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:id="@+id/et_city_register"
           android:layout_marginLeft="20dp"
-          android:layout_marginRight="20dp" />
-
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="Password"
-          android:id="@+id/textView2"
-          android:layout_marginLeft="20dp" />
+          android:layout_marginRight="20dp"
+          android:hint="City"
+          android:textSize="20dp" />
 
       <EditText
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:id="@+id/et_register_password"
           android:layout_marginLeft="20dp"
-          android:layout_marginRight="20dp" />
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="Confirm password"
-          android:id="@+id/tv_confirm_password"
-          android:layout_marginTop="2dp"
-          android:layout_marginLeft="20dp" />
+          android:layout_marginRight="20dp"
+          android:inputType="textPassword"
+          android:hint="Password"
+          android:textSize="20dp" />
 
       <EditText
           android:layout_width="match_parent"
@@ -101,7 +70,10 @@
           android:id="@+id/et_confirm_password"
           android:layout_marginTop="2dp"
           android:layout_marginLeft="20dp"
-          android:layout_marginRight="20dp" />
+          android:layout_marginRight="20dp"
+          android:inputType="textPassword"
+          android:hint="ConfirmPassword"
+          android:textSize="20dp" />
 
       <LinearLayout
           android:orientation="horizontal"
@@ -133,6 +105,12 @@
              android:src="@android:drawable/ic_menu_gallery"/>/>
       </LinearLayout>
 
+      <ImageView
+          android:layout_width="100dp"
+          android:layout_height="100dp"
+          android:id="@+id/ivRegisterPhotoUser"
+          android:layout_gravity="center_horizontal" />
+
       <LinearLayout
           android:orientation="horizontal"
           android:layout_width="match_parent"
@@ -148,6 +126,11 @@
              android:layout_marginLeft="20dp"
              android:layout_marginRight="20dp"
              android:layout_weight="1" />
+
+         <ImageView
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:id="@+id/imageView3" />
 
          <ProgressBar
              android:visibility="invisible"

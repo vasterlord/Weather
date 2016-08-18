@@ -26,13 +26,13 @@ import java.util.ArrayList;
 import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenter;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenterImplement;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 public class RegisterActivity extends AppCompatActivity implements RegisterView, View.OnClickListener {
 
 
     EditText etLoginRegister, etPasswordRegister, etUserName, etCity, etConfirmPassword;
-    ImageView ivCamera, ivGalary, ivOkRegister, ivCancelRegister;
+    ImageView ivCamera, ivGalary, ivOkRegister, ivCancelRegister, ivRegisterPhotoUser;
     ProgressBar progressBarRegister;
 
     CameraPhoto cameraPhoto;
@@ -72,6 +72,7 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
         ivGalary = (ImageView) findViewById(R.id.iv_galery);
         ivOkRegister = (ImageView) findViewById(R.id.iv_ok_register);
         ivCancelRegister = (ImageView) findViewById(R.id.iv_cancel_register);
+        ivRegisterPhotoUser = (ImageView) findViewById(R.id.ivRegisterPhotoUser);
         progressBarRegister = (ProgressBar) findViewById(R.id.progressBarRegister);
 
         cameraPhoto = new CameraPhoto(getApplicationContext());
@@ -158,6 +159,7 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
 
             }
         }
+        ivRegisterPhotoUser.setImageBitmap(photoLoad);
     }
 
     @Override

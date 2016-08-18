@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.helper;
+package ivanrudyk.com.open_weather_api.helpers;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -55,4 +55,5 @@ public class PhotoHelper {
 
         return targetBitmap;
     }
+
 }

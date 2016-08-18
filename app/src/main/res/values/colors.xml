@@ -4,4 +4,12 @@
     <color name="primaryDarkColor">#2196f3</color>
     <color name="colorAccent">#64b5f6</color>
     <color name="colorDialog">#90caf9</color>
+    <color name="sunny">#f6581a</color>
+    <color name="clear_night">#385589</color>
+    <color name="thunder">#2802e6</color>
+    <color name="drizzle">#6479</color>
+    <color name="foggy">#CCCFBC</color>
+    <color name="cloudy">#95c6f0</color>
+    <color name="snowy">#fffafa</color>
+    <color name="empty">#6ece45</color>
 </resources>

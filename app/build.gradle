@@ -32,7 +32,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.1.0'
-    compile 'com.android.support:recyclerview-v7:24.1.0'
     compile 'org.lucasr.dspec:dspec:0.1.1'
     compile 'it.neokree:MaterialTabs:0.11'
     compile 'com.mcxiaoke.volley:library:1.0.+'
@@ -45,8 +44,13 @@ dependencies {
     compile 'com.daimajia.androidanimations:library:1.1.3@aar'
     compile 'com.pkmmte.view:circularimageview:1.1'
     compile 'com.android.support:gridlayout-v7:24.1.0'
-    compile 'com.android.support:design:24.1.0'
-    compile 'com.android.support:support-v4:24.1.0'
+
+    compile 'com.android.support:support-v4:24.1.1'
+    compile 'com.android.support:recyclerview-v7:24.1.1'
+    compile 'com.android.support:cardview-v7:24.1.1'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.squareup.okhttp:okhttp:2.1.0'
+    compile 'com.android.support:design:24.1.1'
 
     compile('com.mikepenz:aboutlibraries:5.6.8@aar') {
         transitive = true
@@ -63,15 +67,9 @@ dependencies {
     //compile 'com.mikepenz:crossfadedrawerlayout:0.3.4@aar'
     compile 'com.mikepenz:google-material-typeface:2.2.0.1@aar'
     compile 'com.mikepenz:fontawesome-typeface:4.4.0.1@aar'
-    //compile 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
-    //compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.firebase:firebase-client-android:2.3.1'
     compile 'com.google.firebase:firebase-core:9.2.0'
-    //Analytics
     compile 'com.google.firebase:firebase-database:9.2.0'
-    //Realtime Database
-    //Storage
-    //compile  'com.google.firebase:firebase-crash:9.2.0'	//Crash Reporting
 
 
 
@@ -80,11 +78,7 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:9.2.1'
 
     compile 'io.realm:realm-android:0.82.1'
-    //Authentication
-    //compile   'com.google.firebase:firebase-messaging:9.2.0'	///Cloud Messaging / Notifications
-    //compile   'com.google.firebase:firebase-config:9.2.0'	//Remote Config
-    //compile   'com.google.firebase:firebase-invites:9.2.0'	//Invites / Dynamic Links
-    //compile  'com.google.firebase:firebase-ads:9.2.0'	//AdMob
+
     compile files('libs/PhotoUtil.jar')
     compile 'com.facebook.android:facebook-android-sdk:4.5.0'
 }

@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIterator;
 import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIteratorInplement;
-import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
+import ivanrudyk.com.open_weather_api.model.Users;
 import ivanrudyk.com.open_weather_api.ui.activity.RegisterView;
 
 /**

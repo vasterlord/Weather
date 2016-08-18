@@ -4,8 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.text.TextUtils;
 
-import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIterator;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 /**
  * Created by Ivan on 03.08.2016.

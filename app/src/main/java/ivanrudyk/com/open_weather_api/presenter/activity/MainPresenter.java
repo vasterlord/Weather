@@ -11,4 +11,6 @@ public interface MainPresenter {
     void retriveUserFirebase(String login, String password, Context context);
 
     void loginFacebook(Profile profile, Context context);
+
+    void getForecast(String city, double v, double v1, String nowURL);
 }

@@ -1,4 +1,4 @@
-package ivanrudyk.com.open_weather_api.helper;
+package ivanrudyk.com.open_weather_api.helpers;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,7 +19,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 
 /**
  * Created by Ivan on 03.08.2016.

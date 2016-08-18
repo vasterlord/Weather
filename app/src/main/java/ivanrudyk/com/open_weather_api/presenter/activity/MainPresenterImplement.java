@@ -7,11 +7,11 @@ import com.facebook.Profile;
 
 import java.util.ArrayList;
 
-import ivanrudyk.com.open_weather_api.helper.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.helper.RealmDbHelper;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
+import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIterator;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIteratorImlement;
-import ivanrudyk.com.open_weather_api.model_user.Users;
+import ivanrudyk.com.open_weather_api.model.Users;
 import ivanrudyk.com.open_weather_api.ui.activity.MainView;
 
 /**
@@ -22,6 +22,15 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     private MainIterator iterator;
     private RealmDbHelper dbHelper = new RealmDbHelper();
     private Context context;
+    private static final String BASE_CURRENT_WEATHER_URL_CITY = "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPId=%s";
+    private static final String BASE_CURRENT_WEATHER_URL_COORD = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&units=metric&APPId=%s";
+    private static final String BASE_DAILY_FORECAST_URL_COORD = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&lat=%s&lon=%s&units=metric";
+    private static final String BASE_HOURLY_FORECAST_URL_COORD = "http://api.openweathermap.org/data/2.5/forecast/hourly?mode=json&lat=%s&lon=%s&units=metric";
+    private static final String BASE_DAILY_FORECAST_URL_CITY = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&q=%s&units=metric";
+    private static final String BASE_HOURLY_FORECAST_URL_CITY = "http://api.openweathermap.org/data/2.5/forecast/hourly?mode=json&q=%s&units=metric";
+    String[] baseUrlCity = new String[]{BASE_CURRENT_WEATHER_URL_CITY, BASE_DAILY_FORECAST_URL_CITY, BASE_HOURLY_FORECAST_URL_CITY};
+    String[] baseUrlCoord = new String[]{BASE_CURRENT_WEATHER_URL_COORD, BASE_DAILY_FORECAST_URL_COORD, BASE_HOURLY_FORECAST_URL_COORD};
+    public String nowURL = BASE_CURRENT_WEATHER_URL_COORD;
 
     Users activeUser = new Users();
     public static Users userActive = new Users("vy");
@@ -47,6 +56,11 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     @Override
     public void loginFacebook(Profile profile, Context context) {
            iterator.loginFasebook(profile, this, context);
+    }
+
+    @Override
+    public void getForecast(String city, double v, double v1, String nowURL) {
+
     }
 
 
@@ -76,6 +90,8 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     public void setUserFasebook(Users users) {
         mainView.setUser(users);
     }
+
+
 
     public void retrivActiveUser(String login, String password) {
         for (int userNumber = 0; userNumber < retrivUserArray.size(); userNumber++) {
@@ -135,7 +151,6 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
             mainView.setUser(activeUser);
             mainView.setViseibleLogin();
             if(activeUser.getUserName()!=null) {
-                dbHelper.saveUserToRealm(activeUser, context);
                 mainView.setDialogClosed();
             }
             else {

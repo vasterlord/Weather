@@ -1,26 +1,37 @@
 package ivanrudyk.com.open_weather_api.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.helper.RealmDbHelper;
+import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
+import ivanrudyk.com.open_weather_api.iterator.activity.MainIterator;
+import ivanrudyk.com.open_weather_api.iterator.activity.MainIteratorImlement;
+import ivanrudyk.com.open_weather_api.model.Users;
 
-public class SettingsActivity extends AppCompatActivity {
-
+public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
     RealmDbHelper dbHelper = new RealmDbHelper();
+    MainIterator mainIterator;
+    Users users = new Users();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Button bQuit = (Button) findViewById(R.id.bQuit);
-        bQuit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dbHelper.deleteUserFromRealm(SettingsActivity.this);
-            }
-        });
+
+        mainIterator = new MainIteratorImlement();
+        Intent intent = getIntent();
+
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            default:
+                break;
+        }
     }
 }

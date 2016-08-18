@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,10 +26,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.helper.PhotoHelper;
-import ivanrudyk.com.open_weather_api.helper.RealmDbHelper;
-import ivanrudyk.com.open_weather_api.model_user.Users;
-import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenter;
+import ivanrudyk.com.open_weather_api.helpers.PhotoHelper;
+import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
+import ivanrudyk.com.open_weather_api.model.Users;
 import ivanrudyk.com.open_weather_api.presenter.fragment.NavigationDraverPresenterImplement;
 import ivanrudyk.com.open_weather_api.presenter.fragment.NavigatonDraverPresenter;
 import ivanrudyk.com.open_weather_api.ui.activity.SettingsActivity;
@@ -54,7 +52,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     Bitmap bmEnd;
     private ProgressBar progressBar;
     LinearLayout linearLayoutAddLoc, linearLayoutSettings;
-    MainPresenter presenter;
     PhotoHelper photoHelper = new PhotoHelper();
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
@@ -65,8 +62,7 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     private Dialog d;
 
     NavigatonDraverPresenter draverPresenter;
-    private RealmDbHelper dbHelper = new RealmDbHelper();
-
+    RealmDbHelper dbHelper = new RealmDbHelper();
 
 
     public NavigationDraverFragment() {
@@ -76,7 +72,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     @Override
     public void onPause() {
         super.onPause();
-
     }
 
     public static void saveToPreferenses(Context context, String preferenceName, String preferenceValue) {
@@ -108,7 +103,7 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
             mFromSavedInstanseState = true;
         }
 
-      //  users = dbHelper.retriveUserFromRealm(getContext());
+        //  users = dbHelper.retriveUserFromRealm(getContext());
 //        users.setUserName("");
 //        users.setPhoto(BitmapFactory.decodeResource(getResources(), R.drawable.qwe));
     }
@@ -125,7 +120,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
         bAdd = (ImageView) v.findViewById(R.id.ivAddLocation);
         linearLayoutAddLoc = (LinearLayout) v.findViewById(R.id.linLayoutAddLoc);
         linearLayoutSettings = (LinearLayout) v.findViewById(R.id.linearLayoutSettings);
-        ivPhotoUser.setImageBitmap(photoHelper.getCircleMaskedBitmapUsingClip(BitmapFactory.decodeResource(getResources(), R.drawable.qwe), 60));
         draverPresenter = new NavigationDraverPresenterImplement(this);
 
         linearLayoutAddLoc.setOnClickListener(new View.OnClickListener() {
@@ -150,22 +144,24 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
             }
         });
 
-
         linearLayoutSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(intent);
             }
         });
-
-
         return v;
     }
 
     public void arrayAdapter() {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, users.getLocation());
-        if (users.getLocation() != null) {
-            lvLocation.setAdapter(adapter);
+
+        if (users.getLocation() != null  && users.getLocation().size()>0) {
+            String temp = users.getLocation().get(0);
+            if(!temp.equals("")) {
+                lvLocation.setAdapter(adapter);
+            }
         }
     }
 
@@ -175,7 +171,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
         tvNavUserName.setText(this.users.getUserName());
         tvNavLogin.setText(this.users.getLogin());
         ivPhotoUser.setImageBitmap(PhotoHelper.getCircleMaskedBitmapUsingClip(this.users.getPhoto(), 60));
-
         arrayAdapter();
 
 
@@ -245,6 +240,13 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     @Override
     public void hideProgress() {
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void setUser(Users user) {
+        this.users = user;
+        dbHelper.deleteUserFromRealm(getActivity());
+        dbHelper.saveUserToRealm(users, getActivity());
     }
 
     private void dialogClosed() {
