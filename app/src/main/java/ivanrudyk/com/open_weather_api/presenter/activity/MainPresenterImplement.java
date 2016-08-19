@@ -93,7 +93,7 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
 
 
 
-    public void retrivActiveUser(String login, String password) {
+    private void retrivActiveUser(String login, String password) {
         for (int userNumber = 0; userNumber < retrivUserArray.size(); userNumber++) {
             if (login.equals(retrivUserArray.get(userNumber).getLogin()) &&
                     password.equals(retrivUserArray.get(userNumber).getPassword())) {
@@ -106,6 +106,9 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     class RetriveProgress extends AsyncTask<String, Void, Void> {
         @Override
         protected void onPreExecute() {
+            FirebaseHelper.arrayListUser.clear();
+            FirebaseHelper.arrayListUserData.clear();
+
             firebaseHelper.retrivDataUser();
             FirebaseHelper.arrayListLocation.clear();
         }

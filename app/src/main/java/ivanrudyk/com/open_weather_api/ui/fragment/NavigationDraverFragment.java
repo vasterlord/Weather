@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ivanrudyk.com.open_weather_api.R;
+import ivanrudyk.com.open_weather_api.adapter.FavoritesLocationAdapter;
 import ivanrudyk.com.open_weather_api.helpers.PhotoHelper;
 import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.model.Users;
@@ -155,14 +155,16 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     }
 
     public void arrayAdapter() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, users.getLocation());
-
-        if (users.getLocation() != null  && users.getLocation().size()>0) {
-            String temp = users.getLocation().get(0);
-            if(!temp.equals("")) {
-                lvLocation.setAdapter(adapter);
-            }
-        }
+//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, users.getLocation());
+//
+//        if (users.getLocation() != null  && users.getLocation().size()>0) {
+//            String temp = users.getLocation().get(0);
+//            if(!temp.equals("")) {
+//                lvLocation.setAdapter(adapter);
+//            }
+//        }
+        FavoritesLocationAdapter locationAdapter = new FavoritesLocationAdapter(this.getContext(), users.getLocation());
+        lvLocation.setAdapter(locationAdapter);
     }
 
     public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar, Users users) {

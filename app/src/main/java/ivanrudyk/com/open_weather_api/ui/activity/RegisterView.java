@@ -22,4 +22,6 @@ public interface RegisterView {
     void setConfirmPasswordError(String s);
 
     void navigateToMain();
+
+    void closeWiew();
 }

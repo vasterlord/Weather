@@ -24,9 +24,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.R;
+import ivanrudyk.com.open_weather_api.helpers.PhotoHelper;
+import ivanrudyk.com.open_weather_api.model.Users;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenter;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenterImplement;
-import ivanrudyk.com.open_weather_api.model.Users;
 
 public class RegisterActivity extends AppCompatActivity implements RegisterView, View.OnClickListener {
 
@@ -159,7 +160,7 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
 
             }
         }
-        ivRegisterPhotoUser.setImageBitmap(photoLoad);
+        ivRegisterPhotoUser.setImageBitmap(PhotoHelper.getCircleMaskedBitmapUsingClip(photoLoad, 100));
     }
 
     @Override
@@ -204,6 +205,11 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
 
     @Override
     public void navigateToMain() {
+        NavUtils.navigateUpFromSameTask(this);
+    }
+
+    @Override
+    public void closeWiew() {
         NavUtils.navigateUpFromSameTask(this);
     }
 }

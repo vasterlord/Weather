@@ -436,7 +436,6 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         etLogin.setText("");
         etPassword.setText("");
         ibLogin.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_outline_white_24dp));
-        d.cancel();
         onCreareToolBar();
     }
 
