@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -23,12 +23,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.adapter.FavoritesLocationAdapter;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.helpers.PhotoHelper;
-import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.presenter.fragment.NavigationDraverPresenterImplement;
 import ivanrudyk.com.open_weather_api.presenter.fragment.NavigatonDraverPresenter;
 import ivanrudyk.com.open_weather_api.ui.activity.SettingsActivity;
@@ -42,14 +43,13 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
 
     public static final String PREF_FILE_NAME = "preffilename";
     public static final String KEY_USER_LEARNED_DRAWER = "user_learned_drawer";
-    public Users users = new Users();
+    public ModelUser users = new ModelUser();
     TextView tvNavUserName, tvNavLogin;
     ImageView ivPhotoUser;
     ListView lvLocation;
     ImageView bAdd;
     Button bAddLocation;
     EditText etAddLocation;
-    Bitmap bmEnd;
     private ProgressBar progressBar;
     LinearLayout linearLayoutAddLoc, linearLayoutSettings;
     PhotoHelper photoHelper = new PhotoHelper();
@@ -58,20 +58,14 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     private boolean mUserLearndDrawer;
     private boolean mFromSavedInstanseState;
     private View containerView;
+    String uid;
 
     private Dialog d;
 
     NavigatonDraverPresenter draverPresenter;
-    RealmDbHelper dbHelper = new RealmDbHelper();
 
 
     public NavigationDraverFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 
     public static void saveToPreferenses(Context context, String preferenceName, String preferenceValue) {
@@ -87,32 +81,25 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (bmEnd == null) {
-            bmEnd = photoHelper.getCircleMaskedBitmapUsingClip(users.getPhoto(), 60);
-        }
-
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserLearndDrawer = Boolean.valueOf((readFromPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, "false")));
-        if (savedInstanceState != null) {
-            mFromSavedInstanseState = true;
-        }
+//        mUserLearndDrawer = Boolean.valueOf((readFromPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, "false")));
+//        if (savedInstanceState != null) {
+//            mFromSavedInstanseState = true;
+//        }
 
-        //  users = dbHelper.retriveUserFromRealm(getContext());
-//        users.setUserName("");
-//        users.setPhoto(BitmapFactory.decodeResource(getResources(), R.drawable.qwe));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_navigation_draver, container, false);
+        final View v = inflater.inflate(R.layout.fragment_navigation_draver, container, false);
+        initializeFragment(v);
+        return v;
+    }
+
+    private void initializeFragment(View v) {
         ivPhotoUser = (ImageView) v.findViewById(R.id.ivPhotoUser);
         tvNavUserName = (TextView) v.findViewById(R.id.tvDrUserName);
         tvNavLogin = (TextView) v.findViewById(R.id.tvDrLogin);
@@ -121,7 +108,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
         linearLayoutAddLoc = (LinearLayout) v.findViewById(R.id.linLayoutAddLoc);
         linearLayoutSettings = (LinearLayout) v.findViewById(R.id.linearLayoutSettings);
         draverPresenter = new NavigationDraverPresenterImplement(this);
-
         linearLayoutAddLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,14 +122,13 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                     bAddLocation.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            draverPresenter.addLocation(users, etAddLocation.getText().toString());
+                            draverPresenter.addLocation(users, uid, etAddLocation.getText().toString());
                         }
                     });
                     d.show();
                 }
             }
         });
-
         linearLayoutSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,27 +136,32 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                 startActivity(intent);
             }
         });
-        return v;
     }
 
     public void arrayAdapter() {
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, users.getLocation());
-//
-//        if (users.getLocation() != null  && users.getLocation().size()>0) {
-//            String temp = users.getLocation().get(0);
-//            if(!temp.equals("")) {
-//                lvLocation.setAdapter(adapter);
-//            }
-//        }
-        FavoritesLocationAdapter locationAdapter = new FavoritesLocationAdapter(this.getContext(), users.getLocation());
-        lvLocation.setAdapter(locationAdapter);
+        final FavoritesLocationAdapter locationAdapter = new FavoritesLocationAdapter(this.getContext(), users.getLocation().getLocation());
+        lvLocation.setClickable(true);
+        lvLocation.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                Toast.makeText(getActivity(), "" + locationAdapter.getItem(position), Toast.LENGTH_SHORT).show();
+            }
+        });
+        if (users.getLocation() != null && users.getLocation().getLocation().size() > 0) {
+            String temp = users.getLocation().getLocation().get(0);
+                lvLocation.setAdapter(locationAdapter);
+
+        }
+
+
+
     }
 
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar, Users users) {
+    public void setUp(int fragmentId, DrawerLayout drawerLayout, final Toolbar toolBar, ModelUser users, String uid) {
         this.users = users;
-
+        this.uid = uid;
         tvNavUserName.setText(this.users.getUserName());
-        tvNavLogin.setText(this.users.getLogin());
+        tvNavLogin.setText(this.users.getEmailAdress());
         ivPhotoUser.setImageBitmap(PhotoHelper.getCircleMaskedBitmapUsingClip(this.users.getPhoto(), 60));
         arrayAdapter();
 
@@ -197,13 +187,6 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                 super.onDrawerClosed(drawerView);
                 getActivity().invalidateOptionsMenu();
             }
-
-//            @Override
-//            public void onDrawerSlide(View drawerView, float slideOffset) {
-//                if (slideOffset < 0.6) {
-//                    toolBar.setAlpha(1 - slideOffset);
-//                }
-//            }
         };
 
         if (!mUserLearndDrawer && !mFromSavedInstanseState) {
@@ -217,11 +200,13 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                 mDrawerToggle.syncState();
             }
         });
+
     }
 
     @Override
     public void setUpFragment() {
-        arrayAdapter();
+        FavoritesLocationAdapter locationAdapter = new FavoritesLocationAdapter(this.getContext(), FirebaseHelper.modelLocation.getLocation());
+        lvLocation.setAdapter(locationAdapter);
     }
 
     @Override
@@ -245,10 +230,8 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
     }
 
     @Override
-    public void setUser(Users user) {
+    public void setUser(ModelUser user) {
         this.users = user;
-        dbHelper.deleteUserFromRealm(getActivity());
-        dbHelper.saveUserToRealm(users, getActivity());
     }
 
     private void dialogClosed() {

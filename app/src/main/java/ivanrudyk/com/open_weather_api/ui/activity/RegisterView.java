@@ -24,4 +24,8 @@ public interface RegisterView {
     void navigateToMain();
 
     void closeWiew();
+
+    void createUserAcount();
+
+    void finishActivity();
 }

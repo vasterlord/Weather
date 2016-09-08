@@ -3,6 +3,7 @@ package ivanrudyk.com.open_weather_api.helpers;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -19,26 +20,104 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelLocation;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 /**
  * Created by Ivan on 03.08.2016.
  */
 public class FirebaseHelper {
 
-    DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference ref = database.child("user");
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReferenceFromUrl("gs://justweather-92b19.appspot.com/");
 
-    public static ArrayList<String> arrayListUserData = new ArrayList();
-    public static ArrayList<Users> arrayListUser = new ArrayList();
-    public static ArrayList<String> arrayListLocation = new ArrayList();
-
+    public static ModelUser modelUser = new ModelUser();
+    public static ModelLocation modelLocation = new ModelLocation();
     public static Bitmap photoDownload;
 
-    public void loadPhotoStorage(String userName, Bitmap photo) {
-        StorageReference userRef = storageRef.child(userName + "/");
+    private DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private StorageReference storageRef = storage.getReferenceFromUrl("gs://justweather-92b19.appspot.com");
+    private DatabaseReference refLocation;
+
+    private ArrayList<String> arrayListLocation = new ArrayList<>();
+
+
+    public void retriveDataLocation(String userName, final String uid) {
+        DatabaseReference refLocation = database.child("Users").child(uid).child(userName).child("location");
+        refLocation.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                fetchDataLocatoin(dataSnapshot);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                fetchDataLocatoin(dataSnapshot);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                fetchDataLocatoin(dataSnapshot);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                fetchDataLocatoin(dataSnapshot);
+            }
+
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchDataLocatoin(DataSnapshot dataSnapshot) {
+        arrayListLocation.clear();
+        for (DataSnapshot ds : dataSnapshot.getChildren()) {
+            arrayListLocation.add(ds.getValue().toString());
+        }
+        modelLocation.setLocation(arrayListLocation);
+    }
+
+    public void addUser(ModelUser modelUser, String userId) {
+        DatabaseReference nameUser = database.child("Users").child(userId).child(modelUser.getUserName());
+        nameUser.setValue(modelUser);
+    }
+
+    public void retrivDataUser(final String uid) {
+        DatabaseReference nameChild = database.child("Users").child(uid);
+
+        nameChild.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                modelUser = dataSnapshot.getValue(ModelUser.class);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                modelUser = dataSnapshot.getValue(ModelUser.class);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                modelUser = dataSnapshot.getValue(ModelUser.class);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                modelUser = dataSnapshot.getValue(ModelUser.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void loadPhotoStorage(String uid, Bitmap photo) {
+        StorageReference userRef = storageRef.child("UsersPhoto").child(uid + "/");
         StorageReference userImagesRef = userRef.child("photo.jpg");
 
         Bitmap bitmap = photo;
@@ -59,103 +138,8 @@ public class FirebaseHelper {
         });
     }
 
-    public void addUser(Users user) {
-        DatabaseReference nameRef = ref.child(user.getUserName());
-        nameRef.setValue(user);
-        DatabaseReference nameRefLocation = nameRef.child("location");
-        nameRefLocation.setValue(user.getLocation());
-    }
-
-    public void retrivDataUser() {
-        ref.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                fetchData(dataSnapshot);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                fetchData(dataSnapshot);
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                fetchData(dataSnapshot);
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                fetchData(dataSnapshot);
-            }
-
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchData(DataSnapshot dataSnapshot) {
-
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            arrayListUserData.add(ds.getValue().toString());
-        }
-    }
-
-    public void sortDataUser() {
-        int userNumber = 0;
-
-        while (userNumber < arrayListUserData.size()) {
-            Users users = new Users();
-            users.setLogin(arrayListUserData.get(userNumber + 1).toString());
-            users.setPassword(arrayListUserData.get(userNumber + 2).toString());
-            users.setUserName(arrayListUserData.get(userNumber + 3).toString());
-            arrayListUser.add(users);
-            userNumber += 4;
-        }
-    }
-
-    private void fetchDataLocatoin(DataSnapshot dataSnapshot) {
-        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-            arrayListLocation.add(ds.getValue().toString());
-        }
-    }
-
-    public void retriveDataLocation(String userName) {
-        DatabaseReference refLocation = ref.child(userName);
-        refLocation.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                fetchDataLocatoin(dataSnapshot);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                fetchDataLocatoin(dataSnapshot);
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     public void downloadPhotoStorage(String userName) {
-        StorageReference userRef = storageRef.child(userName + "/");
+        StorageReference userRef = storageRef.child("UsersPhoto/").child(userName + "/");
         StorageReference userImagesRef = userRef.child("photo.jpg");
 
         final long ONE_MEGABYTE = 1024 * 1024;
@@ -174,4 +158,42 @@ public class FirebaseHelper {
         });
     }
 
+    public void addDataLocation(String userName, final String uid, String newLocation) {
+
+        retriveDataLocation(userName, uid);
+        refLocation = database.child("Users").child(uid).child(userName).child("location");
+        ImplementAddLocation implementAddLocation = new ImplementAddLocation();
+        implementAddLocation.execute(newLocation);
+    }
+
+    class ImplementAddLocation extends AsyncTask<String, Void, Void> {
+
+        ArrayList<String> listLocation = new ArrayList();
+        ModelLocation mlocation = new ModelLocation();
+
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            listLocation.clear();
+            listLocation.addAll(modelLocation.getLocation());
+            listLocation.add(strings[0]);
+            mlocation.setLocation(listLocation);
+            refLocation.setValue(mlocation);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+        }
+    }
 }

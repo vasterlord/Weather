@@ -3,10 +3,13 @@ package ivanrudyk.com.open_weather_api.ui.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +18,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.kosalgeek.android.photoutil.CameraPhoto;
 import com.kosalgeek.android.photoutil.GalleryPhoto;
 import com.kosalgeek.android.photoutil.ImageLoader;
@@ -25,12 +33,16 @@ import java.util.ArrayList;
 
 import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.helpers.PhotoHelper;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
+import ivanrudyk.com.open_weather_api.model.ModelLocation;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenter;
 import ivanrudyk.com.open_weather_api.presenter.activity.RegisterPresenterImplement;
 
 public class RegisterActivity extends AppCompatActivity implements RegisterView, View.OnClickListener {
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     EditText etLoginRegister, etPasswordRegister, etUserName, etCity, etConfirmPassword;
     ImageView ivCamera, ivGalary, ivOkRegister, ivCancelRegister, ivRegisterPhotoUser;
@@ -43,8 +55,25 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
     private final int GALLERY_REQEST = 34623;
 
     RegisterPresenter presenter;
-    Users userAdd = new Users();
+    ModelUser userAdd = new ModelUser();
+    ModelLocation modelLocation = new ModelLocation();
     ArrayList<String> locationStart = new ArrayList();
+    String [] passwordsAndCity;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +83,23 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
         setSupportActionBar(toolbar);
         initializeComponentView();
 
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.e("TAG", "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+
         presenter = new RegisterPresenterImplement(this);
-
-
         ivOkRegister.setOnClickListener(this);
         ivCamera.setOnClickListener(this);
         ivCancelRegister.setOnClickListener(this);
@@ -82,7 +125,6 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_sub, menu);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -102,19 +144,35 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
         return super.onOptionsItemSelected(item);
     }
 
+    public void registerOk(String login, String password) {
+        mAuth.createUserWithEmailAndPassword(login, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d("TAG", "createUserWithEmail:onComplete:" + task.isSuccessful());
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Register failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_ok_register:
                 locationStart.clear();
                 locationStart.add(etCity.getText().toString());
-                userAdd.setLogin(etLoginRegister.getText().toString());
+                userAdd.setEmailAdress(etLoginRegister.getText().toString());
                 userAdd.setUserName(etUserName.getText().toString());
-                userAdd.setPassword(etPasswordRegister.getText().toString());
-                userAdd.setLocation(locationStart);
+                modelLocation.setLocation(locationStart);
+                userAdd.setLocation(modelLocation);
+                String password = etPasswordRegister.getText().toString();
                 String city = etCity.getText().toString();
                 String confPass = etConfirmPassword.getText().toString();
-                presenter.addUser(userAdd, confPass, city, photoLoad);
+                passwordsAndCity = new String[]{password, confPass, city};
+                presenter.createAcount(userAdd, passwordsAndCity);
+                progressBarRegister.setVisibility(View.VISIBLE);
                 break;
             case R.id.iv_camera:
                 try {
@@ -211,5 +269,43 @@ public class RegisterActivity extends AppCompatActivity implements RegisterView,
     @Override
     public void closeWiew() {
         NavUtils.navigateUpFromSameTask(this);
+    }
+
+    @Override
+    public void createUserAcount() {
+        registerOk(etLoginRegister.getText().toString(), etPasswordRegister.getText().toString());
+        RegisterProgress registerProgress = new RegisterProgress();
+        registerProgress.execute();
+    }
+
+    @Override
+    public void finishActivity() {
+        Intent intent = new Intent();
+        intent.putExtra("UserName", userAdd.getUserName());
+        intent.putExtra("EmailADress", userAdd.getEmailAdress());
+        intent.putExtra("PhotoUser", RealmDbHelper.encodeTobase64(photoLoad));
+        intent.putExtra("UserLocation", userAdd.getLocation().getLocation());
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+
+    class RegisterProgress extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            presenter.addUser(userAdd, passwordsAndCity, photoLoad, mAuth.getCurrentUser().getUid());
+        }
     }
 }

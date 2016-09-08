@@ -10,7 +10,7 @@ import com.facebook.Profile;
 public interface MainPresenter {
     void retriveUserFirebase(String login, String password, Context context);
 
-    void loginFacebook(Profile profile, Context context);
+    void setProgressLogin(String s);
 
-    void getForecast(String city, double v, double v1, String nowURL);
+    void loginFacebook(Profile profile, String uid, Context applicationContext);
 }

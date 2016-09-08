@@ -1,7 +1,7 @@
 package ivanrudyk.com.open_weather_api.ui.activity;
 
-import ivanrudyk.com.open_weather_api.model.Users;
 
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 public interface MainView {
     void setLoginError(String userName);
@@ -14,10 +14,12 @@ public interface MainView {
 
     void toastShow(String userName);
 
-    void setUser(Users activeUser);
+    void setUser(ModelUser activeUser);
 
     void setViseibleLogin();
 
     void setDialogClosed();
+
+    void loginUserFirebase(String userLogin, String userPassword);
 
 }

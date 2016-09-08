@@ -1,13 +1,12 @@
 package ivanrudyk.com.open_weather_api.ui.activity;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,21 +32,28 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.helpers.AlertDialogFragment;
+import ivanrudyk.com.open_weather_api.helpers.ArrayHelper;
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.helpers.Helper;
 import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
-import ivanrudyk.com.open_weather_api.model.CurrentlyWeather;
-import ivanrudyk.com.open_weather_api.model.Forecast;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelLocation;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenter;
 import ivanrudyk.com.open_weather_api.presenter.activity.MainPresenterImplement;
 import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverFragment;
@@ -55,6 +61,7 @@ import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverFragment;
 class MainActivity extends AppCompatActivity implements MainView, View.OnClickListener {
 
     private static final String KEY = "keyprf";
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     Toolbar toolbar;
     ImageView imOk;
@@ -63,7 +70,6 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     ProgressBar progressBar;
     LoginButton loginButtonFacebook;
     ImageButton ibLogin;
-    public static final String TAG = MainActivity.class.getSimpleName();
     TextView cityField;
     TextView updatedField;
     TextView detailsField;
@@ -75,20 +81,21 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     CheckBox checkBoxShowPassword;
     ImageView mRefreshImageView;
     ProgressBar mProgressBar;
-    TextView mEmptyTextView;
+
     Handler handler;
-    public Forecast mForecast = new Forecast();
-    public Helper mHelper = new Helper();
-    Drawable drawable;
-    private static final String BASE_CURRENT_WEATHER_URL_CITY = "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPId=%s";
-    private static final String BASE_CURRENT_WEATHER_URL_COORD = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&units=metric&APPId=%s";
-    String nowURL = BASE_CURRENT_WEATHER_URL_COORD;
-    String city = "";
-    String jsonData = "";
+
+    private final int REGISTER_REQUEST = 34323;
+
+    String uid = "";
+
     double[] coord = new double[2];
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
     MainPresenter presenter;
-    Users users = new Users();
+    ModelUser users = new ModelUser();
+    ModelLocation modelLocation = new ModelLocation();
 
     public MainActivity() {
         handler = new Handler();
@@ -96,18 +103,19 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
 
     RealmDbHelper dbHelper = new RealmDbHelper();
     Profile profile;
-    Bitmap bitmap;
     int inputType;
 
     private Dialog d;
+
+    FirebaseHelper firebaseHelper = new FirebaseHelper();
 
     private CallbackManager mCallbackManager;
     private FacebookCallback<LoginResult> mCallback = new FacebookCallback<LoginResult>() {
         @Override
         public void onSuccess(LoginResult loginResult) {
-            AccessToken accessToken = loginResult.getAccessToken();
-            profile = Profile.getCurrentProfile();
-            presenter.loginFacebook(profile, getApplicationContext());
+                AccessToken accessToken = loginResult.getAccessToken();
+                handleFacebookAccessToken(loginResult.getAccessToken());
+                Log.e(TAG, "SsssssignInnn");
 
         }
 
@@ -122,43 +130,102 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         }
     };
 
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token);
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
         setVisibleLoginItem();
-
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK)
+            if (requestCode == REGISTER_REQUEST) {
+                users.setUserName(data.getStringExtra("UserName"));
+                users.setEmailAdress(data.getStringExtra("EmailADress"));
+                users.setPhoto(RealmDbHelper.decodeBase64(data.getByteArrayExtra("PhotoUser")));
+                ArrayList<String> loc = data.getStringArrayListExtra("UserLocation");
+                modelLocation.setLocation(loc);
+                users.setLocation(modelLocation);
+                onCreareToolBar();
+            }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        RealmDbHelper dbHelper = new RealmDbHelper();
-//        Users u = new Users();
-//        u = dbHelper.retriveUserFromRealm(this);
-//        if (u.getUserName() != null && u.getUserName().length() > 0) {
-//            if (users.getUserName() != null && users.getUserName().length() > 0) {
-//                dbHelper.deleteUserFromRealm(this);
-//
-//            }
-//
-//        }
-//        dbHelper.saveUserToRealm(users, this);
-//        ArrayHelper arrayHelper = new ArrayHelper(this);
-//        arrayHelper.saveArray(KEY, (ArrayList<String>) users.getLocation());
+        RealmDbHelper dbHelper = new RealmDbHelper();
+        ModelUser u = new ModelUser();
+        u = dbHelper.retriveUserFromRealm(this);
+        if (u.getUserName() != null && u.getUserName().length() > 0) {
+            if (users.getUserName() != null && users.getUserName().length() > 0) {
+                dbHelper.deleteUserFromRealm(this);
+            }
+        }
+        dbHelper.saveUserToRealm(users, this);
+        ArrayHelper arrayHelper = new ArrayHelper(this);
+        arrayHelper.saveArray(KEY, (ArrayList<String>) users.getLocation().getLocation());
     }
 
+    private void loginFirebase(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.e("LOGIN", "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w("LOGIN", "signInWithEmail:failed", task.getException());
+                            Toast.makeText(getApplicationContext(), "Login failed", Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        FacebookSdk.sdkInitialize(this);
         setContentView(R.layout.activity_main);
 
 
@@ -168,6 +235,25 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(realmConfiguration);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getUid());
+                    uid = user.getUid();
+                    presenter.loginFacebook(profile, uid, getApplicationContext());
+                    Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.e("TAG", "onAuthStateChanged:signed_out");
+                }
+            }
+        };
 
         mRefreshImageView = (ImageView) findViewById(R.id.refreshImageView);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -180,7 +266,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         iconView = (ImageView) findViewById(R.id.icon_Image);
         btnCurrentPlace = (Button) findViewById(R.id.currentLoc);
         btnCityChanged = (Button) findViewById(R.id.cityLoc);
-        coord = mHelper.CoordTracker(getApplicationContext());
+//        coord = mHelper.CoordTracker(getApplicationContext());
         Log.e("TESTING", "Lat = : " + coord[0]);
         Log.e("TESTING", "Lon = " + coord[1]);
 
@@ -198,10 +284,11 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         onCreareToolBar();
         ibLogin.setOnClickListener(this);
         mCallbackManager = new CallbackManager.Factory().create();
+
         profile = Profile.getCurrentProfile();
-
         InitializeDialog();
-
+        LoginProgress loginProgress = new LoginProgress();
+        loginProgress.execute();
     }
 
     private void InitializeDialog() {
@@ -227,7 +314,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     private void onCreateNavigationDraver() {
         NavigationDraverFragment draverFragment = (NavigationDraverFragment)
                 getSupportFragmentManager().findFragmentById(R.id.fragment_navigation_draver);
-        draverFragment.setUp(R.id.fragment_navigation_draver, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar, users);
+        draverFragment.setUp(R.id.fragment_navigation_draver, (DrawerLayout) findViewById(R.id.drawer_layout), toolbar, users, uid);
     }
 
     @Override
@@ -248,7 +335,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     }
 
     private void showDialogLogin() {
-        loginButtonFacebook.setReadPermissions("user_friends");
+        loginButtonFacebook.setReadPermissions("email", "public_profile");
         loginButtonFacebook.registerCallback(mCallbackManager, mCallback);
         progressBar = (ProgressBar) d.findViewById(R.id.progressBarLogin);
         imOk = (ImageView) d.findViewById(R.id.iv_ok_login);
@@ -258,10 +345,9 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         checkBoxShowPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(checkBoxShowPassword.isChecked()){
+                if (checkBoxShowPassword.isChecked()) {
                     etPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                }
-                else {
+                } else {
                     etPassword.setInputType(inputType);
                 }
             }
@@ -270,9 +356,11 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
             @Override
             public void onClick(View view) {
                 d.cancel();
-                startActivity(new Intent(MainActivity.this, RegisterActivity.class));
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                startActivityForResult(intent, REGISTER_REQUEST);
             }
         });
+
         imOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -282,29 +370,11 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                             "No internet access", Toast.LENGTH_LONG).show();
                     return;
                 } else {
-                    presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString(), MainActivity.this);
+                    presenter.retriveUserFirebase(etLogin.getText().toString(), etPassword.getText().toString(), getApplicationContext());
                 }
             }
         });
         d.show();
-    }
-
-    protected void updateDisplay() {
-        CurrentlyWeather currentlyWeather = mForecast.getCurrent();
-        cityField.setText(currentlyWeather.mLocationCurrentWeather.getCity().toUpperCase(Locale.US) +
-                ", " +
-                currentlyWeather.mLocationCurrentWeather.getCountry().toUpperCase(Locale.US));
-        descriptonField.setText(currentlyWeather.mCurrentCondition.getCondition() + "(" + currentlyWeather.mCurrentCondition.getDescription() + ")");
-        detailsField.setText("Humidity: " + String.format("%.0f", currentlyWeather.mCurrentCondition.getHumidity()) + "%" +
-                "\n" + "Pressure: " + String.format("%.0f", currentlyWeather.mCurrentCondition.getPressure()) + " hPa" +
-                "\n" + "Wind speed: " + String.format("%.0f", currentlyWeather.mWind.getSpeed()) + " mps" +
-                "\n" + "Wind direction: " + String.format("%.0f", currentlyWeather.mWind.getDegree()) + "º" +
-                "\n" + "Cloudness: " + currentlyWeather.mClouds.getPrecipitation() + " %"
-        );
-        currentTemperatureField.setText(String.format("%.0f", currentlyWeather.mTemperature.getTemperature()) + "℃");
-        updatedField.setText("Last update: " + currentlyWeather.mLastUpdate.gettimeUpdate().toUpperCase(Locale.US));
-        drawable = getResources().getDrawable(currentlyWeather.getIconId());
-        iconView.setImageDrawable(drawable);
     }
 
     @Override
@@ -319,20 +389,8 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
 
                 break;
             case R.id.currentLoc:
-//                nowURL = BASE_CURRENT_WEATHER_URL_COORD;
-//                coord = mHelper.CoordTracker(getApplicationContext());
-//                try {
-//                    getForecast(city,  coord[0],  coord[1], nowURL);
-//                    city = "";
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();
-//                }
                 break;
             case R.id.cityLoc:
-                nowURL = BASE_CURRENT_WEATHER_URL_CITY;
-                showInputDialog();
-                coord[0] = 0.0;
-                coord[1] = 0.0;
                 break;
             default:
                 break;
@@ -348,18 +406,20 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String temp = users.getLogin();
-                if(users.getLogin()== null || temp.length()==0 || temp.equals("")){
+                String temp = users.getEmailAdress();
+                FirebaseAuth.getInstance().signOut();
+                if (users.getEmailAdress() == null || temp.length() == 0 || temp.equals("")) {
                     loginButtonFacebook.performClick();
                 }
-                Users userQuit = new Users();
-                ArrayList<String>  ar = new ArrayList<String>();
+                ModelUser userQuit = new ModelUser();
+                ModelLocation locationQuit = new ModelLocation();
+                userQuit.setLocation(locationQuit);
                 users = userQuit;
-                users.setLocation(ar);
+                mAuth.signOut();
+                LoginManager.getInstance().logOut();
                 dbHelper.deleteUserFromRealm(getApplication());
                 onCreareToolBar();
                 setVisibleLoginItem();
-
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -368,40 +428,6 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
 
             }
         });
-        builder.show();
-    }
-
-    private void showInputDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-        builder.setTitle("Change city");
-        final EditText input = new EditText(getApplicationContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton("Go", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                city = input.getText().toString();
-                presenter.getForecast(city, coord[0], coord[1], nowURL);
-            }
-        });
-        builder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                input.setText("");
-            }
-        });
-        builder.show();
-    }
-
-    private void alertUserAboutError() {
-        AlertDialogFragment dialog = new AlertDialogFragment();
-        dialog.show(getFragmentManager(), "error_dialog");
-        Context context = getApplicationContext();
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.error_title))
-                .setMessage(context.getString(R.string.error_message))
-                .setPositiveButton(context.getString(R.string.error_ok_button_text), null);
-
         builder.show();
     }
 
@@ -430,11 +456,12 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     }
 
     @Override
-    public void setUser(Users activeUser) {
-        dbHelper.saveUserToRealm(activeUser, this);
-        this.users = activeUser;
+    public void setUser(ModelUser activeUser) {
+        this.users = FirebaseHelper.modelUser;
+        this.users.setLocation(FirebaseHelper.modelLocation);
         etLogin.setText("");
         etPassword.setText("");
+        mProgressBar.setVisibility(View.INVISIBLE);
         ibLogin.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_outline_white_24dp));
         onCreareToolBar();
     }
@@ -449,6 +476,13 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         dialogClosed();
     }
 
+    @Override
+    public void loginUserFirebase(String userLogin, String userPassword) {
+        loginFirebase(userLogin, userPassword);
+        LoginProgress loginProgress = new LoginProgress();
+        loginProgress.execute();
+    }
+
     private void setVisibleLoginItem() {
         if (users.getUserName() == null) {
             ibLogin.setImageDrawable(getResources().getDrawable(R.drawable.ic_lock_open_white_24dp));
@@ -461,5 +495,52 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     public void hideProgress() {
         progressBar.setVisibility(View.INVISIBLE);
     }
+
+    private class LoginProgress extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+          //  mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (mAuth.getCurrentUser() != null) {
+                firebaseHelper.retrivDataUser(mAuth.getCurrentUser().getUid());
+                firebaseHelper.downloadPhotoStorage(mAuth.getCurrentUser().getUid());
+                uid = mAuth.getCurrentUser().getUid();
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+            super.onPostExecute(aVoid);
+            users = FirebaseHelper.modelUser;
+            users.setPhoto(FirebaseHelper.photoDownload);
+            ModelUser u = new ModelUser();
+            u = dbHelper.retriveUserFromRealm(getApplicationContext());
+            if (u.getUserName() != null && u.getUserName().length() > 0) {
+                if (users.getUserName() != null && users.getUserName().length() > 0) {
+                    dbHelper.deleteUserFromRealm(getApplicationContext());
+                }
+            }
+            dbHelper.saveUserToRealm(users, getApplicationContext());
+            onCreareToolBar();
+            d.cancel();
+        }
+    }
+
 
 }

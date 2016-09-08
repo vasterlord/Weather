@@ -1,17 +1,16 @@
 package ivanrudyk.com.open_weather_api.iterator.activity;
 
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.text.TextUtils;
 
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 /**
  * Created by Ivan on 03.08.2016.
  */
 public class RegisterIteratorInplement implements RegisterIterator {
     @Override
-    public void register(final Users user, final OnRegisterFinishedListener listener,  final String confPass, final String city, final Bitmap photoLoad) {
+    public void register(final ModelUser user, final OnRegisterFinishedListener listener, final String[] paswordsAndCity) {
         new Handler().postDelayed(new Runnable() {
             @Override public void run() {
                 boolean error = false;
@@ -19,31 +18,31 @@ public class RegisterIteratorInplement implements RegisterIterator {
                     listener.onUsernameError();
                     error = true;
                 }
-                if (TextUtils.isEmpty(user.getLogin())){
+                if (TextUtils.isEmpty(user.getEmailAdress())){
                     listener.onLoginError();
                     error = true;
                 }
-                if (TextUtils.isEmpty(city)){
+                if (TextUtils.isEmpty(paswordsAndCity[2])){
                     listener.onCityError();
                     error = true;
                 }
 
-                if (TextUtils.isEmpty(confPass)){
+                if (TextUtils.isEmpty(paswordsAndCity[1])){
                     listener.onConfirmPasswordError("is empty");
                     error = true;
                 }
 
-                if (!user.getPassword().equals(confPass)){
+                if (!paswordsAndCity[0].equals(paswordsAndCity[1])){
                     listener.onConfirmPasswordError("password is not equals");
                     error = true;
                 }
 
-                if (TextUtils.isEmpty(user.getPassword())){
+                if (TextUtils.isEmpty(paswordsAndCity[0])){
                     listener.onPasswordError();
                     error = true;
                 }
                 if (!error){
-                    listener.onSuccess(user, photoLoad);
+                    listener.onSuccess();
                 }
             }
         }, 2000);

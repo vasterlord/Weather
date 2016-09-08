@@ -3,12 +3,10 @@ package ivanrudyk.com.open_weather_api.presenter.activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-import java.util.ArrayList;
-
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIterator;
 import ivanrudyk.com.open_weather_api.iterator.activity.RegisterIteratorInplement;
-import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.ui.activity.RegisterView;
 
 /**
@@ -16,13 +14,15 @@ import ivanrudyk.com.open_weather_api.ui.activity.RegisterView;
  */
 public class RegisterPresenterImplement implements RegisterPresenter, RegisterIterator.OnRegisterFinishedListener {
 
+
     private RegisterView registerView;
     private RegisterIterator registerInteractor;
-    Users user = new Users();
+    ModelUser user = new ModelUser();
     Bitmap photoUser;
-    ArrayList<String> locationStart = new ArrayList();
-    FirebaseHelper helper = new FirebaseHelper();
+    private String password;
+    private String userUid;
 
+    FirebaseHelper firebaseHelper = new FirebaseHelper();
 
     public RegisterPresenterImplement(RegisterView registerView) {
         this.registerView = registerView;
@@ -31,11 +31,20 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
 
 
     @Override
-    public void addUser(Users userAdd, String confPass, String city, Bitmap photoLoad) {
-        registerView.showProgress();
+    public void addUser(ModelUser userAdd, String[] passwordsAndCity, Bitmap photoLoad, String userUid) {
         this.user = userAdd;
-        photoUser = photoLoad;
-        registerInteractor.register(user, this, confPass, city,  photoLoad);
+        this.photoUser = photoLoad;
+        this.password = passwordsAndCity[0];
+        this.userUid = userUid;
+        firebaseHelper.addUser(user, userUid);
+        firebaseHelper.loadPhotoStorage(userUid, photoUser);
+        RegisterProgress registerProgress = new RegisterProgress();
+        registerProgress.execute();
+    }
+
+    @Override
+    public void createAcount(ModelUser userAdd, String[] passwordsAndCity) {
+        registerInteractor.register(userAdd, this, passwordsAndCity);
     }
 
     @Override
@@ -54,11 +63,11 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
         }
     }
 
+
     @Override
-    public void onSuccess(Users user, Bitmap photoLoad) {
+    public void onSuccess() {
         if (registerView != null) {
-            RegisterProgress registerProgress = new RegisterProgress();
-            registerProgress.execute();
+            registerView.createUserAcount();
         }
 
     }
@@ -87,77 +96,25 @@ public class RegisterPresenterImplement implements RegisterPresenter, RegisterIt
         }
     }
 
-    private ArrayList<Users> retrivUserArray = new ArrayList<>();
-
-    private boolean retrivActiveUser(String userName) {
-        Boolean result = false;
-        for (int userNumber = 0; userNumber < retrivUserArray.size(); userNumber++) {
-            if (userName.equals(retrivUserArray.get(userNumber).getUserName())) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    class RegisterProgress extends AsyncTask<Void, Void, Void> {
-        FirebaseHelper firebaseHelper = new FirebaseHelper();
-        Boolean regisrerExeption = false;
-        @Override
-        protected void onPreExecute() {
-
-            FirebaseHelper.arrayListUser.clear();
-            FirebaseHelper.arrayListUserData.clear();
-            firebaseHelper.retrivDataUser();
-            registerView.showToast("User "+user.getUserName()+" save...");
-            registerView.showProgress();
-        }
+   private class RegisterProgress extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            firebaseHelper.sortDataUser();
-            retrivUserArray = FirebaseHelper.arrayListUser;
-            if(!retrivActiveUser(user.getUserName())){
-                helper.addUser(user);
-                user.setPhoto(photoUser);
-                if (photoUser != null) {
-                    helper.loadPhotoStorage(user.getUserName(), photoUser);
-                }
-
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                regisrerExeption = false;
-            }
-            else {
-                regisrerExeption = true;
             }
 
             return null;
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
-
-        }
-
-        @Override
         protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            registerView.finishActivity();
             registerView.hideProgress();
-            if(regisrerExeption){
-                registerView.showToast("This user name is booked");
-            }
-            else {
-                registerView.closeWiew();
-            }
         }
     }
-
 
 }

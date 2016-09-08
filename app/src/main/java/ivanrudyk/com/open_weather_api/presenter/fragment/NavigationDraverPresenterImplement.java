@@ -2,15 +2,12 @@ package ivanrudyk.com.open_weather_api.presenter.fragment;
 
 import android.os.AsyncTask;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
 
+import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIterator;
 import ivanrudyk.com.open_weather_api.iterator.fragment.NavigationDraverIteratorImlement;
-import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverView;
 
 /**
@@ -19,7 +16,8 @@ import ivanrudyk.com.open_weather_api.ui.fragment.NavigationDraverView;
 public class NavigationDraverPresenterImplement implements NavigatonDraverPresenter, NavigationDraverIterator.OnDraverFinishedListener {
 
     ArrayList<String> listLocation = new ArrayList();
-    Users user = new Users();
+    ModelUser user = new ModelUser();
+    String uid;
 
     private NavigationDraverView draverView;
     private NavigationDraverIterator draverIterator;
@@ -31,10 +29,11 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
     }
 
     @Override
-    public void addLocation(Users users, String newLocation) {
+    public void addLocation(ModelUser users, String uid, String newLocation) {
         draverView.showProgress();
         draverIterator.addLocation(newLocation, this);
         this.user = users;
+        this.uid = uid;
     }
 
 
@@ -46,32 +45,17 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
 
     @Override
     public void onSuccess(String newLocation) {
-        listLocation.clear();
-        listLocation.addAll(user.getLocation());
-        if (listLocation.size()>0) {
-            if (listLocation.get(0).equals("")) {
-                listLocation.remove(0);
-            }
-        }
-        listLocation.add(newLocation);
+        helper.addDataLocation(user.getUserName(), uid, newLocation);
         ImplementAddLocation implementAddLocation = new ImplementAddLocation();
         implementAddLocation.execute();
     }
 
     class ImplementAddLocation extends AsyncTask<String, Void, Void> {
 
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference ref = database.child("user");
-
-        private void addDataLocation() {
-                DatabaseReference refLocation = ref.child(user.getUserName().toString());
-                DatabaseReference locationRef = refLocation.child("location");
-                locationRef.setValue(listLocation);
-        }
 
         @Override
         protected void onPreExecute() {
-            addDataLocation();
+
         }
 
         @Override
@@ -81,8 +65,7 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            FirebaseHelper.arrayListLocation.clear();
-            helper.retriveDataLocation(user.getUserName());
+            helper.retriveDataLocation(user.getUserName(), uid);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -92,16 +75,12 @@ public class NavigationDraverPresenterImplement implements NavigatonDraverPresen
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
-        }
-
-        @Override
         protected void onPostExecute(Void aVoid) {
             draverView.hideProgress();
-            user.setLocation(FirebaseHelper.arrayListLocation);
+
             draverView.setUpFragment();
             draverView.setDialogClosed();
-            draverView.setUser(user);
+            draverView.setUpFragment();
         }
     }
 }

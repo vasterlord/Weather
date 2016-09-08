@@ -1,6 +1,6 @@
 package ivanrudyk.com.open_weather_api.ui.fragment;
 
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 /**
  * Created by Ivan on 10.08.2016.
@@ -16,5 +16,5 @@ public interface NavigationDraverView {
 
     void hideProgress();
 
-    void setUser(Users user);
+    void setUser(ModelUser user);
 }

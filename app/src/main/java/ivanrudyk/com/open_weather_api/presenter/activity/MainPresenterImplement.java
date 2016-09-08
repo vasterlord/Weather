@@ -1,9 +1,15 @@
 package ivanrudyk.com.open_weather_api.presenter.activity;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.facebook.Profile;
+import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 
@@ -11,40 +17,35 @@ import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIterator;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIteratorImlement;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.iterator.activity.WeatherIterator;
+import ivanrudyk.com.open_weather_api.iterator.activity.WeatherIteratorImplement;
+import ivanrudyk.com.open_weather_api.model.ModelLocation;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 import ivanrudyk.com.open_weather_api.ui.activity.MainView;
 
 /**
  * Created by Ivan on 03.08.2016.
  */
-public class MainPresenterImplement implements MainPresenter, MainIterator.OnMainFinishedListener {
+public class MainPresenterImplement implements MainPresenter, MainIterator.OnMainFinishedListener, WeatherIterator.OnWeatherFinishedListener {
     private MainView mainView;
     private MainIterator iterator;
+    private WeatherIterator weatherIterator;
     private RealmDbHelper dbHelper = new RealmDbHelper();
     private Context context;
-    private static final String BASE_CURRENT_WEATHER_URL_CITY = "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&APPId=%s";
-    private static final String BASE_CURRENT_WEATHER_URL_COORD = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&units=metric&APPId=%s";
-    private static final String BASE_DAILY_FORECAST_URL_COORD = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&lat=%s&lon=%s&units=metric";
-    private static final String BASE_HOURLY_FORECAST_URL_COORD = "http://api.openweathermap.org/data/2.5/forecast/hourly?mode=json&lat=%s&lon=%s&units=metric";
-    private static final String BASE_DAILY_FORECAST_URL_CITY = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&q=%s&units=metric";
-    private static final String BASE_HOURLY_FORECAST_URL_CITY = "http://api.openweathermap.org/data/2.5/forecast/hourly?mode=json&q=%s&units=metric";
-    String[] baseUrlCity = new String[]{BASE_CURRENT_WEATHER_URL_CITY, BASE_DAILY_FORECAST_URL_CITY, BASE_HOURLY_FORECAST_URL_CITY};
-    String[] baseUrlCoord = new String[]{BASE_CURRENT_WEATHER_URL_COORD, BASE_DAILY_FORECAST_URL_COORD, BASE_HOURLY_FORECAST_URL_COORD};
-    public String nowURL = BASE_CURRENT_WEATHER_URL_COORD;
+    private String uid;
+    private Profile profile;
+    private Bitmap photoUser;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
-    Users activeUser = new Users();
-    public static Users userActive = new Users("vy");
-
-
+    ModelUser activeUser = new ModelUser();
+    ModelLocation modelLocation = new ModelLocation();
     FirebaseHelper firebaseHelper = new FirebaseHelper();
-
-    ArrayList<Users> retrivUserArray = new ArrayList<>();
 
     public MainPresenterImplement(MainView mainView) {
         this.mainView = mainView;
         this.iterator = new MainIteratorImlement();
+        this.weatherIterator = new WeatherIteratorImplement();
     }
-
 
     @Override
     public void retriveUserFirebase(String userLogin, String userPassword, Context context) {
@@ -53,16 +54,26 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         iterator.login(userLogin, userPassword, this);
     }
 
+
     @Override
-    public void loginFacebook(Profile profile, Context context) {
-           iterator.loginFasebook(profile, this, context);
+    public void setProgressLogin(String uid) {
+        this.uid = uid;
+        firebaseHelper.retrivDataUser(uid);
     }
 
     @Override
-    public void getForecast(String city, double v, double v1, String nowURL) {
-
+    public void loginFacebook(Profile profile, final String uid, Context context) {
+        this.profile = profile;
+        this.uid = uid;
+        this.context = context;
+        LoginFacebookProgress loginFacebookProgress = new LoginFacebookProgress();
+        loginFacebookProgress.execute();
     }
 
+    private void listenerFacebook(final String uid) {
+        FirebaseHelper.modelUser.setUserName(null);
+        firebaseHelper.retrivDataUser(uid);
+    }
 
     @Override
     public void onLoginError() {
@@ -82,85 +93,150 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
 
     @Override
     public void onSuccess(String userLogin, String userPassword) {
-        RetriveProgress progress = new RetriveProgress();
-        progress.execute(userLogin, userPassword);
+        mainView.loginUserFirebase(userLogin, userPassword);
     }
 
-    @Override
-    public void setUserFasebook(Users users) {
-        mainView.setUser(users);
-    }
-
-
-
-    private void retrivActiveUser(String login, String password) {
-        for (int userNumber = 0; userNumber < retrivUserArray.size(); userNumber++) {
-            if (login.equals(retrivUserArray.get(userNumber).getLogin()) &&
-                    password.equals(retrivUserArray.get(userNumber).getPassword())) {
-                activeUser.setUserName(retrivUserArray.get(userNumber).getUserName());
-                activeUser.setLogin(retrivUserArray.get(userNumber).getLogin());
-            }
-        }
-    }
-
-    class RetriveProgress extends AsyncTask<String, Void, Void> {
+    private class LoginFacebookProgress extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
-            FirebaseHelper.arrayListUser.clear();
-            FirebaseHelper.arrayListUserData.clear();
-
-            firebaseHelper.retrivDataUser();
-            FirebaseHelper.arrayListLocation.clear();
+            super.onPreExecute();
         }
 
         @Override
-        protected Void doInBackground(String... strings) {
+        protected Void doInBackground(Void... voids) {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            firebaseHelper.sortDataUser();
-            retrivUserArray = FirebaseHelper.arrayListUser;
-            retrivActiveUser(strings[0], strings[1]);
-            if (activeUser.getUserName() != null) {
+            listenerFacebook(uid);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            do {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                firebaseHelper.downloadPhotoStorage(activeUser.getUserName());
-                firebaseHelper.retriveDataLocation(activeUser.getUserName());
+            }while (profile==null);
+            do {
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            while (profile.getId().length()  < 1);
+
+            Log.e("TESTING", "UID = "+uid);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (FirebaseHelper.modelUser.getUserName() == null) {
+                loginUserFacebook();
+                Picasso.with(context)
+                        .load(profile.getProfilePictureUri(150, 150))
+                        .into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                photoUser = bitmap;
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Drawable errorDrawable) {
+
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                            }
+                        });
+            }
+            Log.e("TESTING", "LOG");
+            LoginFacebookProgress2 loginFacebookProgress2 = new LoginFacebookProgress2();
+            loginFacebookProgress2.execute();
+        }
+    }
+
+    private class LoginFacebookProgress2 extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (FirebaseHelper.modelUser.getUserName() == null) {
+
+                do {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (photoUser == null);
+                firebaseHelper.loadPhotoStorage(uid, photoUser);
+                Log.e("TESTING", "000000000000000");
+
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                firebaseHelper.retrivDataUser(uid);
+                firebaseHelper.downloadPhotoStorage(uid);
+                do {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (FirebaseHelper.photoDownload == null);
+                Log.e("TESTING", "1111111111");
             } else {
-                mainView.toastShow("Incorect login or password");
+                firebaseHelper.retrivDataUser(uid);
+                firebaseHelper.downloadPhotoStorage(uid);
+                do {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (FirebaseHelper.photoDownload == null);
             }
             return null;
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {
-        }
-
-        @Override
         protected void onPostExecute(Void aVoid) {
+            Log.e("TESTING", "LOG");
+            activeUser = FirebaseHelper.modelUser;
             activeUser.setPhoto(FirebaseHelper.photoDownload);
-            activeUser.setLocation(FirebaseHelper.arrayListLocation);
-            mainView.hideProgress();
+            if (dbHelper.retriveUserFromRealm(context) != null)
+                dbHelper.deleteUserFromRealm(context);
+            dbHelper.saveUserToRealm(activeUser, context);
+            mainView.setDialogClosed();
             mainView.setUser(activeUser);
-            mainView.setViseibleLogin();
-            if(activeUser.getUserName()!=null) {
-                mainView.setDialogClosed();
-            }
-            else {
-                mainView.setLoginError("Incorect login or password");
-            }
-
         }
+    }
+
+    public void loginUserFacebook() {
+        activeUser.setUserName(profile.getName());
+        activeUser.setEmailAdress("");
+        ArrayList<String> mLoc = new ArrayList<>();
+        mLoc.add("");
+        modelLocation.setLocation(mLoc);
+        activeUser.setLocation(modelLocation);
+        firebaseHelper.addUser(activeUser, uid);
     }
 
 }

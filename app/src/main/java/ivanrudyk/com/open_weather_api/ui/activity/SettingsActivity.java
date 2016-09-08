@@ -9,12 +9,12 @@ import ivanrudyk.com.open_weather_api.R;
 import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIterator;
 import ivanrudyk.com.open_weather_api.iterator.activity.MainIteratorImlement;
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener {
     RealmDbHelper dbHelper = new RealmDbHelper();
     MainIterator mainIterator;
-    Users users = new Users();
+    ModelUser users = new ModelUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

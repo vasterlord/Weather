@@ -2,14 +2,14 @@ package ivanrudyk.com.open_weather_api.iterator.activity;
 
 import android.graphics.Bitmap;
 
-import ivanrudyk.com.open_weather_api.model.Users;
+import ivanrudyk.com.open_weather_api.model.ModelUser;
 
 /**
  * Created by Ivan on 03.08.2016.
  */
 public interface RegisterIterator {
 
-    void register(Users user, OnRegisterFinishedListener onRegisterFinishedListener,  String confPass, String city, Bitmap photoLoad);
+    void register(ModelUser user, OnRegisterFinishedListener onRegisterFinishedListener, final String[] paswordsAndCity);
 
     interface OnRegisterFinishedListener {
 
@@ -17,7 +17,7 @@ public interface RegisterIterator {
 
         void onPasswordError();
 
-        void onSuccess(Users user, Bitmap photoLoad);
+        void onSuccess();
 
         void onLoginError();
 
