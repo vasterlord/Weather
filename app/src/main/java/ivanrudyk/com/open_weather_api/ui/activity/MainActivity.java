@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import ivanrudyk.com.open_weather_api.R;
-import ivanrudyk.com.open_weather_api.helpers.ArrayHelper;
 import ivanrudyk.com.open_weather_api.helpers.FirebaseHelper;
 import ivanrudyk.com.open_weather_api.helpers.Helper;
 import ivanrudyk.com.open_weather_api.helpers.RealmDbHelper;
@@ -110,14 +109,18 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     FirebaseHelper firebaseHelper = new FirebaseHelper();
 
     private CallbackManager mCallbackManager;
+
+
+
     private FacebookCallback<LoginResult> mCallback = new FacebookCallback<LoginResult>() {
-        @Override
-        public void onSuccess(LoginResult loginResult) {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
                 AccessToken accessToken = loginResult.getAccessToken();
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 Log.e(TAG, "SsssssignInnn");
-
-        }
+//mAuth.signOut();
+//            dbHelper.deleteUserFromRealm(getApplicationContext());
+            }
 
         @Override
         public void onCancel() {
@@ -168,6 +171,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         if (resultCode == RESULT_OK)
             if (requestCode == REGISTER_REQUEST) {
                 users.setUserName(data.getStringExtra("UserName"));
+                Log.e(TAG, "qqqqqqqqqqqqqqqq" + users.getUserName());
                 users.setEmailAdress(data.getStringExtra("EmailADress"));
                 users.setPhoto(RealmDbHelper.decodeBase64(data.getByteArrayExtra("PhotoUser")));
                 ArrayList<String> loc = data.getStringArrayListExtra("UserLocation");
@@ -186,11 +190,12 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         if (u.getUserName() != null && u.getUserName().length() > 0) {
             if (users.getUserName() != null && users.getUserName().length() > 0) {
                 dbHelper.deleteUserFromRealm(this);
+                dbHelper.saveUserToRealm(users, this);
             }
         }
-        dbHelper.saveUserToRealm(users, this);
-        ArrayHelper arrayHelper = new ArrayHelper(this);
-        arrayHelper.saveArray(KEY, (ArrayList<String>) users.getLocation().getLocation());
+
+//        ArrayHelper arrayHelper = new ArrayHelper(this);
+//        arrayHelper.saveArray(KEY, (ArrayList<String>) users.getLocation().getLocation());
     }
 
     private void loginFirebase(String email, String password) {
@@ -238,6 +243,8 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
 
         mAuth = FirebaseAuth.getInstance();
 
+        profile = Profile.getCurrentProfile();
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -246,7 +253,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                     // User is signed in
                     Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getUid());
                     uid = user.getUid();
-                    presenter.loginFacebook(profile, uid, getApplicationContext());
+                    presenter.loginFacebook(profile, user.getUid(), getApplicationContext());
                     Log.e("TAG", "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
@@ -254,6 +261,8 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                 }
             }
         };
+
+
 
         mRefreshImageView = (ImageView) findViewById(R.id.refreshImageView);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -276,7 +285,9 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         btnCityChanged.setOnClickListener(this);
         mRefreshImageView.setOnClickListener(this);
 
+
         users = dbHelper.retriveUserFromRealm(this);
+        Log.e(TAG, "wwwwwwwwwwwwwwwwwwwwww" + users.getUserName());
 
         presenter = new MainPresenterImplement(this);
 
@@ -285,7 +296,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         ibLogin.setOnClickListener(this);
         mCallbackManager = new CallbackManager.Factory().create();
 
-        profile = Profile.getCurrentProfile();
+
         InitializeDialog();
         LoginProgress loginProgress = new LoginProgress();
         loginProgress.execute();
@@ -336,7 +347,28 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
 
     private void showDialogLogin() {
         loginButtonFacebook.setReadPermissions("email", "public_profile");
-        loginButtonFacebook.registerCallback(mCallbackManager, mCallback);
+        //loginButtonFacebook.registerCallback(mCallbackManager, mCallback);
+        loginButtonFacebook.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>(){
+            @Override
+            public void onSuccess (LoginResult loginResult){
+                AccessToken accessToken = loginResult.getAccessToken();
+                handleFacebookAccessToken(loginResult.getAccessToken());
+                Log.e(TAG, "SsssssignInnn");
+                if(mAuth.getCurrentUser()!=null)
+                presenter.loginFacebook(profile, mAuth.getCurrentUser().getUid(), getApplicationContext());
+              //  presenter.loginFacebook(profile, mAuth.getCurrentUser().getUid(), getApplicationContext());
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
         progressBar = (ProgressBar) d.findViewById(R.id.progressBarLogin);
         imOk = (ImageView) d.findViewById(R.id.iv_ok_login);
         etRegister = (TextView) d.findViewById(R.id.etRegister);
@@ -414,6 +446,9 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                 ModelUser userQuit = new ModelUser();
                 ModelLocation locationQuit = new ModelLocation();
                 userQuit.setLocation(locationQuit);
+//                FirebaseHelper.modelUser = null;
+//           //     FirebaseHelper.modelLocation = null;
+//                FirebaseHelper.photoDownload = null;
                 users = userQuit;
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
@@ -458,6 +493,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
     @Override
     public void setUser(ModelUser activeUser) {
         this.users = FirebaseHelper.modelUser;
+        Log.e(TAG, "eeeeeeeeeeeeeeeeee" + users.getUserName());
         this.users.setLocation(FirebaseHelper.modelLocation);
         etLogin.setText("");
         etPassword.setText("");
@@ -500,7 +536,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-          //  mProgressBar.setVisibility(View.VISIBLE);
+            //  mProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -511,6 +547,7 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
                 e.printStackTrace();
             }
             if (mAuth.getCurrentUser() != null) {
+                presenter.loginFacebook(profile, mAuth.getCurrentUser().getUid(), getApplicationContext());
                 firebaseHelper.retrivDataUser(mAuth.getCurrentUser().getUid());
                 firebaseHelper.downloadPhotoStorage(mAuth.getCurrentUser().getUid());
                 uid = mAuth.getCurrentUser().getUid();
@@ -527,16 +564,20 @@ class MainActivity extends AppCompatActivity implements MainView, View.OnClickLi
         protected void onPostExecute(Void aVoid) {
             mProgressBar.setVisibility(View.INVISIBLE);
             super.onPostExecute(aVoid);
-            users = FirebaseHelper.modelUser;
-            users.setPhoto(FirebaseHelper.photoDownload);
-            ModelUser u = new ModelUser();
-            u = dbHelper.retriveUserFromRealm(getApplicationContext());
-            if (u.getUserName() != null && u.getUserName().length() > 0) {
-                if (users.getUserName() != null && users.getUserName().length() > 0) {
-                    dbHelper.deleteUserFromRealm(getApplicationContext());
+            if (mAuth.getCurrentUser() != null) {
+                users = FirebaseHelper.modelUser;
+                Log.e(TAG, "tttttttttttttttttttt" + users.getUserName());
+                users.setPhoto(FirebaseHelper.photoDownload);
+
+                ModelUser u = new ModelUser();
+                u = dbHelper.retriveUserFromRealm(getApplicationContext());
+                if (u.getUserName() != null && u.getUserName().length() > 0) {
+                    if (users.getUserName() != null && users.getUserName().length() > 0) {
+                        dbHelper.deleteUserFromRealm(getApplicationContext());
+                    }
                 }
+                dbHelper.saveUserToRealm(users, getApplicationContext());
             }
-            dbHelper.saveUserToRealm(users, getApplicationContext());
             onCreareToolBar();
             d.cancel();
         }

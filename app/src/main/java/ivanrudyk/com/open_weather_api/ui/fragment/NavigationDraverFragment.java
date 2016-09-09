@@ -176,7 +176,7 @@ public class NavigationDraverFragment extends Fragment implements NavigationDrav
                 super.onDrawerOpened(drawerView);
                 if (!mUserLearndDrawer) {
                     mUserLearndDrawer = true;
-                    saveToPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, mUserLearndDrawer + "");
+                    //saveToPreferenses(getActivity(), KEY_USER_LEARNED_DRAWER, mUserLearndDrawer + "");
                 }
                 getActivity().invalidateOptionsMenu();
             }

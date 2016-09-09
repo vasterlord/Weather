@@ -3,13 +3,12 @@ package ivanrudyk.com.open_weather_api.helpers;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 import io.realm.exceptions.RealmMigrationNeededException;
 import ivanrudyk.com.open_weather_api.database.RealmLocation;
 import ivanrudyk.com.open_weather_api.database.RealmModelUser;
@@ -25,7 +24,7 @@ public class RealmDbHelper {
     public static final String PREF_FILE_NAME = "prefname";
     public void saveUserToRealm(ModelUser user, Context context) {
         Realm realm = null;
-
+        Log.e("TAG", "----------ADDD");
         try {
             realm = Realm.getInstance(context);
 
@@ -83,10 +82,12 @@ public class RealmDbHelper {
     public void deleteUserFromRealm(Context context) {
         Realm realm = Realm.getInstance(context);
         realm.beginTransaction();
-        RealmQuery query = realm.where(RealmModelUser.class);
-        RealmResults results = query.findAll();
-      if(results.size() > 0)
-        results.get(0).removeFromRealm();
+        realm.where(RealmModelUser.class).findAll().clear();
+//        RealmQuery query = realm.where(RealmModelUser.class);
+//        RealmResults results = query.findAll();
+//
+//        results.removeLast();
+       Log.e("TAG", "----------DELETE");
         realm.commitTransaction();
     }
 

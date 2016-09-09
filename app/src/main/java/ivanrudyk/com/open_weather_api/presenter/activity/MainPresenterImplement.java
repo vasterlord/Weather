@@ -36,6 +36,7 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     private Profile profile;
     private Bitmap photoUser;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private boolean t;
 
     ModelUser activeUser = new ModelUser();
     ModelLocation modelLocation = new ModelLocation();
@@ -66,13 +67,33 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         this.profile = profile;
         this.uid = uid;
         this.context = context;
+        firebaseHelper.retrivDataUser(uid);
         LoginFacebookProgress loginFacebookProgress = new LoginFacebookProgress();
         loginFacebookProgress.execute();
     }
 
-    private void listenerFacebook(final String uid) {
-        FirebaseHelper.modelUser.setUserName(null);
-        firebaseHelper.retrivDataUser(uid);
+    private boolean listenerFacebook() {
+
+        if (FirebaseHelper.modelUser.getUserName() != null) {
+            t = true;
+        }
+        else if (FirebaseHelper.modelUser.getUserName() != null) {
+            if (FirebaseHelper.modelUser.getUserName().length() > 0) {
+                t = true;
+            }
+        }
+        else if (FirebaseHelper.modelUser != null)
+        {
+            t = true;
+        }
+        else if(FirebaseHelper.photoDownload !=null){
+            t = true;
+        }
+        else{
+        t = false;
+        }
+
+        return t;
     }
 
     @Override
@@ -105,24 +126,18 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            listenerFacebook(uid);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             do {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }while (profile==null);
+            } while (profile == null);
+            Log.e("TESTING", "88888888888");
             do {
                 try {
                     Thread.sleep(100);
@@ -130,16 +145,16 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
                     e.printStackTrace();
                 }
             }
-            while (profile.getId().length()  < 1);
+            while (profile.getName().length() < 1);
 
-            Log.e("TESTING", "UID = "+uid);
+            Log.e("TESTING", "UID = " + uid);
 
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if (FirebaseHelper.modelUser.getUserName() == null) {
+            if (listenerFacebook()) {
                 loginUserFacebook();
                 Picasso.with(context)
                         .load(profile.getProfilePictureUri(150, 150))
@@ -175,11 +190,10 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (FirebaseHelper.modelUser.getUserName() == null) {
-
+            if (listenerFacebook()) {
                 do {
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(200);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -211,7 +225,7 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                } while (FirebaseHelper.photoDownload == null);
+                } while (FirebaseHelper.photoDownload == null && FirebaseHelper.modelUser == null);
             }
             return null;
         }
@@ -230,13 +244,15 @@ public class MainPresenterImplement implements MainPresenter, MainIterator.OnMai
     }
 
     public void loginUserFacebook() {
-        activeUser.setUserName(profile.getName());
-        activeUser.setEmailAdress("");
+        Log.e("TESTING", "LOGIIINNNN");
+        ModelUser actUser = new ModelUser();
+        actUser.setUserName(profile.getName());
+        actUser.setEmailAdress("");
         ArrayList<String> mLoc = new ArrayList<>();
         mLoc.add("");
         modelLocation.setLocation(mLoc);
-        activeUser.setLocation(modelLocation);
-        firebaseHelper.addUser(activeUser, uid);
+        actUser.setLocation(modelLocation);
+        firebaseHelper.addUser(actUser, uid);
     }
 
 }
